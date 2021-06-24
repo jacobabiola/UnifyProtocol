@@ -18,7 +18,7 @@ Once installed, let's run Hardhat's testing network:
 npx hardhat node
 ```
 
-Then, on a new terminal, go to the repository's root folder and run this to
+Then open a new terminal and in UnifyProtocol/hardhat run this to
 deploy your contract:
 
 ```sh
