@@ -6,6 +6,7 @@ import React, { useState, useEffect } from 'react';
 import { ethers } from "ethers";
 import GreeterArtifact from "./contracts/Greeter.json";
 import contractAddress from "./contracts/contract-address.json";
+import { VaultHome } from './components/VaultUI/VaultHome'
 
 const HARDHAT_NETWORK_ID = '31337';
 // const ETHEREUM_NETWORK_ID = '1';
@@ -41,16 +42,17 @@ function App() {
   } else {
     return (
       <Container maxW="container.xl">
-        <Flex justify="center" align="center" pt="2">
+        {/* <Flex justify="center" align="center" pt="2">
           <Heading> Unify Vault </Heading>
           <Spacer/>
           <Button onClick = {() => connectWallet() }> Logout </Button>
-        </Flex>
-        <Flex>
+        </Flex> */}
+        {/* <Flex>
           <Text>
             { greeterGreeting }
           </Text>
-        </Flex>
+        </Flex> */}
+        <VaultHome/>
       </Container>
     );
   }

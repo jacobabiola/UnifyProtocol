@@ -11,7 +11,9 @@
   "scripts": {
     "forkEth": "npx hardhat node --fork https://mainnet.infura.io/v3/23b5846652c3481d8b6fd706dbd23b0e",
     "forkPolygon": "npx hardhat node --fork https://speedy-nodes-nyc.moralis.io/42aa96da03e06985042bb4bc/polygon/mainnet --port 8555",
+    "fork": "npx hardhat node --fork https://mainnet.infura.io/v3/23b5846652c3481d8b6fd706dbd23b0e & npx hardhat node --fork https://speedy-nodes-nyc.moralis.io/42aa96da03e06985042bb4bc/polygon/mainnet --port 8555 &",
     "deployEth": "npx hardhat run scripts/deploy.js --network localhost",
-    "deployPolygon": "npx hardhat run scripts/deployPolygon.js --network localhost --port 8555"
+    "deployPolygon": "npx hardhat run scripts/deployPolygon.js --network localPolygon",
+    "deploy": "npx hardhat run scripts/deploy.js --network localhost ; npx hardhat run scripts/deployPolygon.js --network localPolygon"
   }
 }
