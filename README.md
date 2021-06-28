@@ -12,17 +12,20 @@ cd UnifyProtocol/hardhat
 npm install
 ```
 
-Once installed, let's run Hardhat's testing network:
+Once installed, let's run a node (and fork a network):
 
 ```sh
-npx hardhat node
+// Fork Ethereum
+npm run forkEth
+// Fork Polygon
+npm run forkPolygon
 ```
 
 Then open a new terminal and in UnifyProtocol/hardhat run this to
-deploy your contract:
+deploy your contract to the forked network:
 
 ```sh
-npx hardhat run scripts/deploy.js --network localhost
+npm run deploy
 ```
 All contracts are injected into the frontend when deployed.
 
