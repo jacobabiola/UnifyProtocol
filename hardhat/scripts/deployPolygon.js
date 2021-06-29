@@ -21,7 +21,7 @@ async function main() {
   await greeter.deployed();
 
   console.log("Greeter deployed to:", greeter.address);
-  saveFrontendFiles("Greeter", greeter)
+  // saveFrontendFiles("Greeter", greeter)
 }
 
 function saveFrontendFiles(name, token) {

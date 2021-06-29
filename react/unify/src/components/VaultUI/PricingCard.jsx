@@ -9,6 +9,7 @@ import {
   useColorModeValue as mode,
 } from '@chakra-ui/react'
 import * as React from 'react'
+import DepositModal from './DepositModal'
 const CheckIcon = createIcon({
   viewBox: '0 0 17 12',
   d: 'M0 5.82857L1.64571 4.11429L5.48571 7.2L14.8114 0L16.4571 1.71429L5.48571 12L0 5.82857Z',
@@ -135,18 +136,10 @@ export const PricingCard = (props) => {
         ))}
       </List>
 
-      <Button
-        minH="3.5rem"
-        rounded="lg"
-        fontWeight="bold"
-        colorScheme={popular ? 'blue' : 'gray'}
-        mt="8"
-        w="100%"
-        onClick={onClick}
-        isDisabled={!popular}
-      >
-        Deposit
-      </Button>
+      <DepositModal
+        disabled={!popular}
+        token = { props.token }
+      />
     </PricingWrapper>
   )
 }

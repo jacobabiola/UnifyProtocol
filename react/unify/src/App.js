@@ -5,6 +5,7 @@ import { Alert, AlertIcon, AlertTitle, AlertDescription } from "@chakra-ui/react
 import React, { useState, useEffect } from 'react';
 import { ethers } from "ethers";
 import GreeterArtifact from "./contracts/Greeter.json";
+import EthVaultArtifact from "./contracts/ETHVault.json";
 import contractAddress from "./contracts/contract-address.json";
 import { VaultHome } from './components/VaultUI/VaultHome'
 
@@ -17,6 +18,7 @@ function App() {
   const [selectedAddress, setSelectedAddress] = useState(undefined);
   const [provider, setProvider] = useState(undefined);
   const [greeterContract, setGreeterContract] = useState(undefined)
+  const [ethVaultContract, setEthVaultContract] = useState(undefined)
   const [greeterGreeting, setGreeterGreeting] = useState("Loading...")
   const [networkError, setNetworkError] = useState(false)
   if (selectedAddress === undefined) {
@@ -111,8 +113,20 @@ function App() {
       );
       setGreeterContract(greetContract)
       // Load data from contract
-      let greeting = await greetContract.greet()
-      setGreeterGreeting(greeting)
+      // let greeting = await greetContract.greet()
+      // setGreeterGreeting(greeting)
+
+      // Initialise Contract
+      let ethVault = new ethers.Contract(
+        contractAddress.ETHVault,
+        EthVaultArtifact.abi,
+        ethersProvider.getSigner()
+      );
+      setEthVaultContract(ethVault)
+
+      // Load data from contract
+      // let name = await ethVault.name()
+      // console.log(name, "is loaded!")
   }
 }
 

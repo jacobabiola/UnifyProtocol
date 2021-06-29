@@ -14,21 +14,28 @@ async function main() {
   // manually to make sure everything is compiled
   // await hre.run('compile');
 
+  let DAI = "0x6b175474e89094c44da98b954eedeac495271d0f" // DAI Address
+
   console.log("---------- DEPLOYING ETH CONTRACTS ------------")
   // We get the contract to deploy
   const Greeter = await hre.ethers.getContractFactory("Greeter");
   const greeter = await Greeter.deploy("Hello, this is data from a smart contract!");
 
   await greeter.deployed();
-
   console.log("Greeter deployed to:", greeter.address);
   saveFrontendFiles("Greeter", greeter)
+
+  const ETHVault = await hre.ethers.getContractFactory("ETHVault");
+  const ethVault = await ETHVault.deploy("DAI Vault ETH", DAI);
+
+  await ethVault.deployed();
+  console.log("ethVault deployed to:", ethVault.address);
+  saveFrontendFiles("ETHVault", ethVault)
 
   
   // ------- SEND OURSELVES A TOKEN ------------
   console.log("------------------------- Begin Moving Funds -----------------------------")
-  let DAI = "0x6b175474e89094c44da98b954eedeac495271d0f" // DAI Address
-  let accountToStealFrom = "0x5642ea5D90c14E515c6a06718Da700E646B7f9Aa"
+  let accountToStealFrom = "0xacd614c63e7d9aed0e747d72a8723d5ea3b41424"
   let accountToGiveTo = "0x9b591bf6970D271c4660Df5E08d85773E998B59E"
   let tokenToSteal = DAI
   await ethers.provider.send("hardhat_impersonateAccount", [accountToStealFrom])

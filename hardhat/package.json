@@ -15,5 +15,8 @@
     "deployEth": "npx hardhat run scripts/deploy.js --network localhost",
     "deployPolygon": "npx hardhat run scripts/deployPolygon.js --network localPolygon",
     "deploy": "npx hardhat run scripts/deploy.js --network localhost ; npx hardhat run scripts/deployPolygon.js --network localPolygon"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.1.0"
   }
 }

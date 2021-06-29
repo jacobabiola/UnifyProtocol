@@ -3,6 +3,14 @@ import * as React from 'react'
 import { PricingCard } from './PricingCard'
 
 export const VaultHome = () => {
+
+  var token = {
+    address: "0x6b175474e89094c44da98b954eedeac495271d0f",
+    symbol: "DAI",
+    image: "https://s2.coinmarketcap.com/static/img/coins/64x64/4943.png",
+    decimals: 1e18
+  }
+
   return (
     <Box as="section" bg={mode('gray.50', 'gray.800')} py="20">
       <Box
@@ -63,6 +71,8 @@ export const VaultHome = () => {
               'Always have the best rate for your crypto',
               'Deposit on Ethereum earn cross chain',
             ]}
+            token={token}
+
           />
           <PricingCard
             popular
@@ -76,6 +86,7 @@ export const VaultHome = () => {
               'Withdraw anytime',
 
             ]}
+            token={token}
           />
           <PricingCard
             name="WBTC"
@@ -86,6 +97,8 @@ export const VaultHome = () => {
               'Always have the best rate for your crypto',
               'Deposit on Ethereum earn cross chain',
             ]}
+            token={token}
+
           />
         </SimpleGrid>
       </Box>

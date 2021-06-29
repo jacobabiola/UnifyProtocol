@@ -3,7 +3,7 @@
 Basic hardhat backend with react frontend template. 
 ## Quick start
 
-The first things you need to do is clone this repository and installing its
+The first things you need to do is clone this repository and install its
 dependencies:
 
 ```sh
@@ -12,10 +12,11 @@ cd UnifyProtocol/hardhat
 npm install
 ```
 
-Once installed, we can fork Polygon and Eth Mainnet and deploy them to seperate nodes:
+Once installed, we can fork Polygon and Eth Mainnet and deploy them to nodes. In seperate terminals run:
 
 ```sh
-npm run fork
+npm run forkEth
+npm run forkPolygon
 ```
 
 To deploy contracts to the ETH network write in deploy.js
@@ -28,7 +29,7 @@ deploy your contracts to the forked networks:
 npm run deploy
 ```
 
-To inject artifacts into the frontend make sure to add "saveFrontendFiles()" when deployed.
+To inject artifacts into the frontend make sure to add "saveFrontendFiles()" in deploy.js when deployed.
 
 Finally, we can run the frontend. Go back to the root directory (UnifyProtocol) then:
 
