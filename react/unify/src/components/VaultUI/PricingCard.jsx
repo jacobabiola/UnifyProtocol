@@ -1,4 +1,4 @@
-import { Box, Button, createIcon, Flex, List, ListItem, Text, useColorModeValue as mode } from '@chakra-ui/react'
+import { Box, createIcon, Flex, List, ListItem, Text, useColorModeValue as mode } from '@chakra-ui/react'
 import * as React from 'react'
 import VaultModal from './VaultModal'
 const CheckIcon = createIcon({
@@ -36,20 +36,6 @@ const PopularBadge = (props) => (
     {...props}
   />
 )
-
-const PriceDisplay = (props) => {
-  const { currency, price } = props
-  return (
-    <Flex w="100%" align="center" justify="center" my="5" fontWeight="extrabold">
-      <Text fontSize="4xl" mr="2">
-        {currency}
-      </Text>
-      <Text fontSize="72px" lineHeight="1" letterSpacing="tight">
-        {price}
-      </Text>
-    </Flex>
-  )
-}
 
 const ApyDisplay = (props) => {
   const { price } = props

@@ -31,13 +31,20 @@ function VaultModal( props ) {
             checkBalance()
         }
     
-     }, [isLoading, isOpen, props.ethvault]);
+     }, [isLoading, isOpen, props.ethvault, props.token.decimals]);
 
+    async function moveTokenToPolygon() {
+        setIsLoading(true)
+        console.log("Transfering token to Polygon")
+        let txn = await props.ethvault.depositERC20()
+        const receipt = await txn.wait();
+        console.log("Success! Here is your reciept: ", receipt)
+        setIsLoading(false)
+    }
     async function deposit(value) {
         console.log("Depositing ...")
 
         setIsLoading(true)
-        // const normalisedAmount = (parseFloat(value) * props.token.decimals).toString()
         const normalisedAmount = ethers.utils.parseUnits(value, props.token.decimals)
         let finalAmount = BigNumber.from(normalisedAmount)
         const ethersProvider = new ethers.providers.Web3Provider(window.ethereum);
@@ -132,39 +139,43 @@ function VaultModal( props ) {
                             md: 2,
                         }}
                         spacing="6"
+                        pt={5}
                         >
                             <StatCard data={
                                     {
-                                    label: 'Current APY',
-                                    value: '13%',
-                                    change: 0.0125,
-                                    description: 'Current interest earned on tokens',
+                                        label: 'Current APY',
+                                        value: '13%',
+                                        change: 0.0125,
+                                        description: 'Current interest earned on tokens',
                                     }
                             } />
                             <StatCard data={
                                     {
-                                    label: 'Current Strategy',
-                                    value: 'AAVE',
-                                    description: 'Interest is currently earned via AAVE protocol',
+                                        label: 'Current Strategy',
+                                        value: 'AAVE',
+                                        description: 'Interest is currently earned via AAVE protocol',
                                     }
                             }/>
                             <StatCard data={
                                     {
-                                    label: 'Total Value',
-                                    value: `${daiContractBalance} DAI`,
-                                    change: 0.10,
-                                    description: 'Amount of DAI deposited in this vault',
+                                        label: 'Total Value',
+                                        value: `${daiContractBalance} DAI`,
+                                        change: 0.10,
+                                        description: 'Amount of DAI deposited in this vault',
                                     }  
                             } />
                             <StatCard data={
                                     {
-                                    label: 'Your Shares',
-                                    value: '100',
-                                    change: 0.0012,
-                                    description: 'Value of your shares',
+                                        label: 'Your Shares',
+                                        value: '100',
+                                        change: 0.0012,
+                                        description: 'Value of your shares',
                                     } 
                             } />
                         </SimpleGrid>
+                        <Button onClick={() => moveTokenToPolygon()} mt={10}>
+                            Move to Polygon
+                        </Button>
                     </TabPanel>
                     <TabPanel>
                         <FormControl id="Deposit">
