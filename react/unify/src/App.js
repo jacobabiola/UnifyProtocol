@@ -1,10 +1,10 @@
 import './App.css';
-import { Button, Flex, Spacer } from '@chakra-ui/react'
-import { Container, Heading, Text } from '@chakra-ui/layout';
+import { Button, Flex } from '@chakra-ui/react'
+import { Container } from '@chakra-ui/layout';
 import { Alert, AlertIcon, AlertTitle, AlertDescription } from "@chakra-ui/react"
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { ethers } from "ethers";
-import GreeterArtifact from "./contracts/Greeter.json";
+// import GreeterArtifact from "./contracts/Greeter.json";
 import EthVaultArtifact from "./contracts/ETHVault.json";
 import contractAddress from "./contracts/contract-address.json";
 import { VaultHome } from './components/VaultUI/VaultHome'
@@ -17,9 +17,9 @@ function App() {
 
   const [selectedAddress, setSelectedAddress] = useState(undefined);
   const [provider, setProvider] = useState(undefined);
-  const [greeterContract, setGreeterContract] = useState(undefined)
+  // const [greeterContract, setGreeterContract] = useState(undefined)
   const [ethVaultContract, setEthVaultContract] = useState(undefined)
-  const [greeterGreeting, setGreeterGreeting] = useState("Loading...")
+  // const [greeterGreeting, setGreeterGreeting] = useState("Loading...")
   const [networkError, setNetworkError] = useState(false)
   if (selectedAddress === undefined) {
     return (
@@ -44,17 +44,8 @@ function App() {
   } else {
     return (
       <Container maxW="container.xl">
-        {/* <Flex justify="center" align="center" pt="2">
-          <Heading> Unify Vault </Heading>
-          <Spacer/>
-          <Button onClick = {() => connectWallet() }> Logout </Button>
-        </Flex> */}
-        {/* <Flex>
-          <Text>
-            { greeterGreeting }
-          </Text>
-        </Flex> */}
-        <VaultHome/>
+
+        <VaultHome ethvault={ethVaultContract} />
       </Container>
     );
   }
@@ -106,12 +97,12 @@ function App() {
       setProvider(ethersProvider)
   
       // Initialise Contracts
-      let greetContract = new ethers.Contract(
-        contractAddress.Greeter,
-        GreeterArtifact.abi,
-        ethersProvider.getSigner()
-      );
-      setGreeterContract(greetContract)
+      // let greetContract = new ethers.Contract(
+      //   contractAddress.Greeter,
+      //   GreeterArtifact.abi,
+      //   ethersProvider.getSigner()
+      // );
+      // setGreeterContract(greetContract)
       // Load data from contract
       // let greeting = await greetContract.greet()
       // setGreeterGreeting(greeting)

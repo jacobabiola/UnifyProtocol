@@ -2,13 +2,13 @@ import { Box, Heading, SimpleGrid, Text, useColorModeValue as mode } from '@chak
 import * as React from 'react'
 import { PricingCard } from './PricingCard'
 
-export const VaultHome = () => {
+export const VaultHome = (props) => {
 
   var token = {
     address: "0x6b175474e89094c44da98b954eedeac495271d0f",
     symbol: "DAI",
     image: "https://s2.coinmarketcap.com/static/img/coins/64x64/4943.png",
-    decimals: 1e18
+    decimals: 18
   }
 
   return (
@@ -72,7 +72,7 @@ export const VaultHome = () => {
               'Deposit on Ethereum earn cross chain',
             ]}
             token={token}
-
+            ethvault={props.ethvault}
           />
           <PricingCard
             popular
@@ -87,6 +87,8 @@ export const VaultHome = () => {
 
             ]}
             token={token}
+            ethvault={props.ethvault}
+
           />
           <PricingCard
             name="WBTC"
@@ -98,6 +100,8 @@ export const VaultHome = () => {
               'Deposit on Ethereum earn cross chain',
             ]}
             token={token}
+            ethvault={props.ethvault}
+
 
           />
         </SimpleGrid>

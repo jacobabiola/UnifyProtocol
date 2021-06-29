@@ -1,15 +1,6 @@
-import {
-  Box,
-  Button,
-  createIcon,
-  Flex,
-  List,
-  ListItem,
-  Text,
-  useColorModeValue as mode,
-} from '@chakra-ui/react'
+import { Box, Button, createIcon, Flex, List, ListItem, Text, useColorModeValue as mode } from '@chakra-ui/react'
 import * as React from 'react'
-import DepositModal from './DepositModal'
+import VaultModal from './VaultModal'
 const CheckIcon = createIcon({
   viewBox: '0 0 17 12',
   d: 'M0 5.82857L1.64571 4.11429L5.48571 7.2L14.8114 0L16.4571 1.71429L5.48571 12L0 5.82857Z',
@@ -136,9 +127,10 @@ export const PricingCard = (props) => {
         ))}
       </List>
 
-      <DepositModal
+      <VaultModal
         disabled={!popular}
         token = { props.token }
+        ethvault={props.ethvault}
       />
     </PricingWrapper>
   )

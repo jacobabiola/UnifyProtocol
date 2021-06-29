@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ethers, BigNumber } from "ethers";
-import { Text, Image, VStack, HStack, Button, FormControl, FormLabel, FormHelperText, useDisclosure } from '@chakra-ui/react'
+import { SimpleGrid, Text, Image, VStack, HStack, Button, FormControl, FormLabel, FormHelperText, useDisclosure } from '@chakra-ui/react'
 import { Tabs, TabList, TabPanels, Tab, TabPanel } from "@chakra-ui/react"
 import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalCloseButton } from "@chakra-ui/react"
 import { NumberInput, NumberInputField, NumberInputStepper, NumberIncrementStepper, NumberDecrementStepper  } from "@chakra-ui/react"
 import contractAddress from "../../contracts/contract-address.json";
-import EthVaultArtifact from "../../contracts/ETHVault.json";
+import { StatCard } from "../Stat"
 const erc20ABI = require('../../contracts/ERC20ABI.json')
 
-function DepositModal( props ) {
+function VaultModal( props ) {
 
     const [isLoading, setIsLoading] = useState(false) 
     const [isApproved, setIsApproved] = useState(false)
@@ -18,12 +18,27 @@ function DepositModal( props ) {
     const parse = (val) => val.replace(/^\$/, "")
   
     const [depositValue, setDepositValue] = React.useState("0.00")
+    const [daiContractBalance, setDaiContractBalance] = useState(0)
+
+    useEffect(() => {
+        async function checkBalance() {
+            let balance = await props.ethvault.checkBalance()
+            let normalisedBalance = ethers.utils.formatUnits(balance.toString(), props.token.decimals)
+            setDaiContractBalance(normalisedBalance)
+            console.log("Balance updated to: ", normalisedBalance)
+        }
+        if ((isLoading === false) && (isOpen)) {
+            checkBalance()
+        }
+    
+     }, [isLoading, isOpen, props.ethvault]);
 
     async function deposit(value) {
         console.log("Depositing ...")
 
         setIsLoading(true)
-        const normalisedAmount = (parseFloat(value) * props.token.decimals).toString()
+        // const normalisedAmount = (parseFloat(value) * props.token.decimals).toString()
+        const normalisedAmount = ethers.utils.parseUnits(value, props.token.decimals)
         let finalAmount = BigNumber.from(normalisedAmount)
         const ethersProvider = new ethers.providers.Web3Provider(window.ethereum);
 
@@ -40,15 +55,6 @@ function DepositModal( props ) {
         setIsApproved(false)
         console.log("Done")
 
-        let ethVault = new ethers.Contract(
-            contractAddress.ETHVault,
-            EthVaultArtifact.abi,
-            ethersProvider.getSigner()
-          );
-
-        // Load data from contract
-        let balance = await ethVault.checkBalance()
-        console.log("ETH Vault balance is now: ", balance.toString())
     
       }
     
@@ -56,7 +62,7 @@ function DepositModal( props ) {
         console.log("Approving ...")
 
         setIsLoading(true)
-        const normalisedAmount = (parseFloat(value) * props.token.decimals).toString()
+        const normalisedAmount = ethers.utils.parseUnits(value, props.token.decimals)
         let finalAmount = BigNumber.from(normalisedAmount)
         const ethersProvider = new ethers.providers.Web3Provider(window.ethereum);
 
@@ -75,22 +81,8 @@ function DepositModal( props ) {
       }
     
       async function withdraw(address, value) {
-        // const myAddresses = await web3.eth.getAccounts()
-        const finalAmount = parseFloat(value) * props.token.decimals
-        // lendingPoolInstance.methods.withdraw(address, finalAmount, myAddresses[0]).send({from: myAddresses[0]})
-        // .once('transactionHash', (hash) => {
-        //   // transaction hash
-        //   console.log("Transaction hash: " + hash)
-        //   setIsConfirmingWithdraw(true)
-        // })
-        // .on('confirmation', (number, receipt) => {
-        //     // number of confirmations
-        //     console.log("no of confirmations: " + number)
-        //     setIsConfirmingWithdraw(false)
-        // })
-        // .on('error', (error) => {
-        //     console.log(error);
-        // });
+
+
       }
 
     return (
@@ -103,7 +95,7 @@ function DepositModal( props ) {
             mt="8"
             w="100%"
             isDisabled={props.disabled}
-        > Deposit </Button>
+        > Open Vault </Button>
   
         <Modal
           isOpen={isOpen}
@@ -112,7 +104,7 @@ function DepositModal( props ) {
         >
           <ModalOverlay />
           <ModalContent>
-            <ModalHeader>Actions</ModalHeader>
+            <ModalHeader>Vault</ModalHeader>
             <ModalCloseButton />
             <ModalBody pb={6}>
             <VStack pb="4">
@@ -127,11 +119,53 @@ function DepositModal( props ) {
 
             <Tabs align="center" variant="soft-rounded" colorScheme="blue">
                 <TabList>
+                    <Tab>Overview</Tab>
                     <Tab>Deposit</Tab>
                     <Tab>Withdraw</Tab>
                 </TabList>
 
                 <TabPanels>
+                    <TabPanel>
+                        <SimpleGrid
+                        columns={{
+                            base: 1,
+                            md: 2,
+                        }}
+                        spacing="6"
+                        >
+                            <StatCard data={
+                                    {
+                                    label: 'Current APY',
+                                    value: '13%',
+                                    change: 0.0125,
+                                    description: 'Current interest earned on tokens',
+                                    }
+                            } />
+                            <StatCard data={
+                                    {
+                                    label: 'Current Strategy',
+                                    value: 'AAVE',
+                                    description: 'Interest is currently earned via AAVE protocol',
+                                    }
+                            }/>
+                            <StatCard data={
+                                    {
+                                    label: 'Total Value',
+                                    value: `${daiContractBalance} DAI`,
+                                    change: 0.10,
+                                    description: 'Amount of DAI deposited in this vault',
+                                    }  
+                            } />
+                            <StatCard data={
+                                    {
+                                    label: 'Your Shares',
+                                    value: '100',
+                                    change: 0.0012,
+                                    description: 'Value of your shares',
+                                    } 
+                            } />
+                        </SimpleGrid>
+                    </TabPanel>
                     <TabPanel>
                         <FormControl id="Deposit">
                             <FormLabel>Amount</FormLabel>
@@ -185,4 +219,4 @@ function DepositModal( props ) {
     )
   }
 
-  export default DepositModal
+  export default VaultModal
