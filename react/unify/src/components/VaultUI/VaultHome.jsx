@@ -10,6 +10,19 @@ export const VaultHome = (props) => {
     image: "https://s2.coinmarketcap.com/static/img/coins/64x64/4943.png",
     decimals: 18
   }
+  var kovanToken = {
+    address: "0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa",
+    symbol: "DAI",
+    image: "https://s2.coinmarketcap.com/static/img/coins/64x64/4943.png",
+    decimals: 18
+  }
+  var goerliToken = {
+    address: "0x76a245568c71C221a2Ce4a300359333ddd2ECa2c",
+    symbol: "DAI",
+    image: "https://s2.coinmarketcap.com/static/img/coins/64x64/4943.png",
+    decimals: 18
+  }
+  
 
   return (
     <Box as="section" bg={mode('gray.50', 'gray.800')} py="20">
@@ -32,7 +45,7 @@ export const VaultHome = (props) => {
             sm: 'center',
           }}
         >
-          Unify Vaults
+          Unify Vaults on {props.networkname}
         </Heading>
         <Text
           mt="4"
@@ -71,8 +84,10 @@ export const VaultHome = (props) => {
               'Always have the best rate for your crypto',
               'Deposit on Ethereum earn cross chain',
             ]}
-            token={token}
+            token={goerliToken}
             ethvault={props.ethvault}
+            address={props.address}
+            provider={props.provider}
           />
           <PricingCard
             popular
@@ -86,8 +101,10 @@ export const VaultHome = (props) => {
               'Withdraw anytime',
 
             ]}
-            token={token}
+            token={goerliToken}
             ethvault={props.ethvault}
+            address={props.address}
+            provider={props.provider}
 
           />
           <PricingCard
@@ -99,9 +116,10 @@ export const VaultHome = (props) => {
               'Always have the best rate for your crypto',
               'Deposit on Ethereum earn cross chain',
             ]}
-            token={token}
+            token={goerliToken}
             ethvault={props.ethvault}
-
+            address={props.address}
+            provider={props.provider}
 
           />
         </SimpleGrid>

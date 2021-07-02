@@ -38,7 +38,7 @@ function saveFrontendFiles(name, token) {
     addresses = JSON.parse(addressesJSON);
   }
   
-  addresses[name] = token.address
+  addresses[name] = token.address.toLowerCase() // LOWER CASE IS IMPORTANT FOR CONTRACT SIGNING FOUND THIS OUT THE HARD WAY
   fs.writeFileSync(
     contractsDir + "/contract-address.json",
     JSON.stringify( addresses , undefined, 2)

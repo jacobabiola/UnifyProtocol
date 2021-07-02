@@ -117,6 +117,8 @@ export const PricingCard = (props) => {
         disabled={!popular}
         token = { props.token }
         ethvault={props.ethvault}
+        address={props.address}
+        provider={props.provider}
       />
     </PricingWrapper>
   )

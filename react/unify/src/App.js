@@ -10,6 +10,9 @@ import contractAddress from "./contracts/contract-address.json";
 import { VaultHome } from './components/VaultUI/VaultHome'
 
 const HARDHAT_NETWORK_ID = '31337';
+// const KOVAN_NETWORK_ID = '42';
+const GOERLI_NETWORK_ID = '5';
+const MUMBAI_NETWORK_ID = '80001'
 // const ETHEREUM_NETWORK_ID = '1';
 // const POLYGON_NETWORK_ID = '137';
 
@@ -17,10 +20,10 @@ function App() {
 
   const [selectedAddress, setSelectedAddress] = useState(undefined);
   const [provider, setProvider] = useState(undefined);
-  // const [greeterContract, setGreeterContract] = useState(undefined)
   const [ethVaultContract, setEthVaultContract] = useState(undefined)
-  // const [greeterGreeting, setGreeterGreeting] = useState("Loading...")
   const [networkError, setNetworkError] = useState(false)
+  const [networkName, setNetworkName] = useState(undefined)
+
   if (selectedAddress === undefined) {
     return (
       <Container maxW="container.xl">
@@ -29,7 +32,7 @@ function App() {
           <Alert status="error">
             <AlertIcon />
             <AlertTitle mr={2}>Wrong Network</AlertTitle>
-            <AlertDescription>Please change to Localhost 8545</AlertDescription>
+            <AlertDescription>Please change to Goerli, Mumbai or Localhost</AlertDescription>
           </Alert>
         )
       }
@@ -45,7 +48,12 @@ function App() {
     return (
       <Container maxW="container.xl">
 
-        <VaultHome ethvault={ethVaultContract} />
+        <VaultHome 
+          ethvault={ethVaultContract}
+          address={selectedAddress}
+          provider={provider}
+          networkname={networkName}
+        />
       </Container>
     );
   }
@@ -66,28 +74,43 @@ function App() {
 
 
     console.log("Your address is: ", address)
-
     // When user changes their account.
     window.ethereum.on("accountsChanged", ([newAddress]) => {
       setSelectedAddress(newAddress);
+      console.log("Account changed to: ", newAddress)
       initialiseContracts()
     });
     // When user changes their network.
     window.ethereum.on("chainChanged", ([newChainId]) => {
-      checkNetwork()
+      // console.log("Network changed ...")
+      // checkNetwork()
+      window.location.reload();
     });
       
   }
 
   function checkNetwork() {
     // check the network
-    if (window.ethereum.networkVersion !== HARDHAT_NETWORK_ID) {
-      console.log( "Wrong Network" )
-      setNetworkError(true)
-      return false;
-    } else {
+    if (window.ethereum.networkVersion === GOERLI_NETWORK_ID) {   
+      console.log( "Connected to Goerli ", window.ethereum.networkVersion )
+      setNetworkName("Goerli")
       setNetworkError(false)
-      return true
+      return true;
+    } else if (window.ethereum.networkVersion === MUMBAI_NETWORK_ID) {
+      console.log( "Connected to Mumbai ", window.ethereum.networkVersion )
+      setNetworkName("Mumbai")
+      setNetworkError(false)
+      return true;
+    } 
+    else if (window.ethereum.networkVersion === HARDHAT_NETWORK_ID) {
+      console.log( "Connected to Localhost ", window.ethereum.networkVersion )
+      setNetworkName("Localhost")
+      setNetworkError(false)
+      return true;
+    }
+    else {
+      setNetworkError(true)
+      return false
     }
   }
 
@@ -95,17 +118,6 @@ function App() {
       // Initialise EthersJS
       const ethersProvider = new ethers.providers.Web3Provider(window.ethereum);
       setProvider(ethersProvider)
-  
-      // Initialise Contracts
-      // let greetContract = new ethers.Contract(
-      //   contractAddress.Greeter,
-      //   GreeterArtifact.abi,
-      //   ethersProvider.getSigner()
-      // );
-      // setGreeterContract(greetContract)
-      // Load data from contract
-      // let greeting = await greetContract.greet()
-      // setGreeterGreeting(greeting)
 
       // Initialise Contract
       let ethVault = new ethers.Contract(
@@ -115,9 +127,6 @@ function App() {
       );
       setEthVaultContract(ethVault)
 
-      // Load data from contract
-      // let name = await ethVault.name()
-      // console.log(name, "is loaded!")
   }
 }
 

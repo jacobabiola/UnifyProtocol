@@ -14,16 +14,17 @@ async function main() {
   // manually to make sure everything is compiled
   // await hre.run('compile');
 
-  let DAI = "0x6b175474e89094c44da98b954eedeac495271d0f" // DAI Address
+  // let DAI = "0x6b175474e89094c44da98b954eedeac495271d0f" // DAI Address MAINNET
+  let DAI = "0x76a245568c71C221a2Ce4a300359333ddd2ECa2c" // DAI address Goerli
 
   console.log("---------- DEPLOYING ETH CONTRACTS ------------")
   // We get the contract to deploy
-  const Greeter = await hre.ethers.getContractFactory("Greeter");
-  const greeter = await Greeter.deploy("Hello, this is data from a smart contract!");
+  // const Greeter = await hre.ethers.getContractFactory("Greeter");
+  // const greeter = await Greeter.deploy("Hello, this is data from a smart contract!");
 
-  await greeter.deployed();
-  console.log("Greeter deployed to:", greeter.address);
-  saveFrontendFiles("Greeter", greeter)
+  // await greeter.deployed();
+  // console.log("Greeter deployed to:", greeter.address);
+  // saveFrontendFiles("Greeter", greeter)
 
   const ETHVault = await hre.ethers.getContractFactory("ETHVault");
   const ethVault = await ETHVault.deploy("DAI Vault ETH", DAI);
@@ -34,27 +35,27 @@ async function main() {
 
   
   // ------- SEND OURSELVES A TOKEN ------------
-  console.log("------------------------- Begin Moving Funds -----------------------------")
-  let accountToStealFrom = "0xacd614c63e7d9aed0e747d72a8723d5ea3b41424"
-  let accountToGiveTo = "0x9b591bf6970D271c4660Df5E08d85773E998B59E"
-  let tokenToSteal = DAI
-  await ethers.provider.send("hardhat_impersonateAccount", [accountToStealFrom])
-  const signer = await ethers.provider.getSigner(accountToStealFrom)
-  let erc20Address = tokenToSteal 
-  let erc20Contract = new ethers.Contract(erc20Address, ERC20Abi, signer); 
-  const name = await erc20Contract.name();
-  console.log("Taking ", name, " from: ", accountToStealFrom, "and giving to: ", accountToGiveTo)
-  var balanceOfMe = await erc20Contract.balanceOf(accountToGiveTo);
-  var balanceToSteal = await erc20Contract.balanceOf(accountToStealFrom);
-  console.log("Your current token balance: ", balanceOfMe.toString())
-  console.log("Future balance: ", balanceToSteal.toString())
-  // Transfer ERC20 to ourselves
-  const approveTransfer = await erc20Contract.transfer(accountToGiveTo, balanceToSteal.toString())
-  await approveTransfer.wait();
-  console.log("Transfer complete ...")
-  balanceOfMe = await erc20Contract.balanceOf(accountToGiveTo);
-  console.log("Your new token balance: ", balanceOfMe.toString())
-  console.log("------------------------- End Moving Funds -----------------------------")
+  // console.log("------------------------- Begin Moving Funds -----------------------------")
+  // let accountToStealFrom = "0xacd614c63e7d9aed0e747d72a8723d5ea3b41424"
+  // let accountToGiveTo = "0x9b591bf6970D271c4660Df5E08d85773E998B59E"
+  // let tokenToSteal = DAI
+  // await ethers.provider.send("hardhat_impersonateAccount", [accountToStealFrom])
+  // const signer = await ethers.provider.getSigner(accountToStealFrom)
+  // let erc20Address = tokenToSteal 
+  // let erc20Contract = new ethers.Contract(erc20Address, ERC20Abi, signer); 
+  // const name = await erc20Contract.name();
+  // console.log("Taking ", name, " from: ", accountToStealFrom, "and giving to: ", accountToGiveTo)
+  // var balanceOfMe = await erc20Contract.balanceOf(accountToGiveTo);
+  // var balanceToSteal = await erc20Contract.balanceOf(accountToStealFrom);
+  // console.log("Your current token balance: ", balanceOfMe.toString())
+  // console.log("Future balance: ", balanceToSteal.toString())
+  // // Transfer ERC20 to ourselves
+  // const approveTransfer = await erc20Contract.transfer(accountToGiveTo, balanceToSteal.toString())
+  // await approveTransfer.wait();
+  // console.log("Transfer complete ...")
+  // balanceOfMe = await erc20Contract.balanceOf(accountToGiveTo);
+  // console.log("Your new token balance: ", balanceOfMe.toString())
+  // console.log("------------------------- End Moving Funds -----------------------------")
   // --------------------------------------------
 }
 
@@ -72,7 +73,7 @@ function saveFrontendFiles(name, token) {
     addresses = JSON.parse(addressesJSON);
   }
   
-  addresses[name] = token.address
+  addresses[name] = token.address.toLowerCase() // LOWER CASE IS IMPORTANT FOR CONTRACT SIGNING FOUND THIS OUT THE HARD WAY
   fs.writeFileSync(
     contractsDir + "/contract-address.json",
     JSON.stringify( addresses , undefined, 2)

@@ -12,13 +12,6 @@ cd UnifyProtocol/hardhat
 npm install
 ```
 
-Once installed, we can fork Polygon and Eth Mainnet and deploy them to nodes. In seperate terminals run:
-
-```sh
-npm run forkEth
-npm run forkPolygon
-```
-
 To deploy contracts to the ETH network write in deploy.js
 To deploy contracts to the POLYGON network write in deployPolygon.js
 
@@ -27,6 +20,12 @@ deploy your contracts to the forked networks:
 
 ```sh
 npm run deploy
+```
+
+or deploy each netwotk contracts seperately with
+```sh
+npm run deployEth
+npm run deployPolygon
 ```
 
 To inject artifacts into the frontend make sure to add "saveFrontendFiles()" in deploy.js when deployed.
@@ -39,4 +38,4 @@ npm install
 npm start
 ```
 
-Change metamask to localhost to interact with the app.
+Change metamask to Goerli/Mumbai to interact with the app.
