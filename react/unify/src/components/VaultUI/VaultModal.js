@@ -7,6 +7,8 @@ import { NumberInput, NumberInputField, NumberInputStepper, NumberIncrementStepp
 import contractAddress from "../../contracts/contract-address.json";
 import { StatCard } from "../Stat"
 import { signDaiPermit } from 'eth-permit';
+import { GOERLI_NETWORK_ID } from '../../App';
+import { MaticPOSClient } from '@maticnetwork/maticjs'
 
 const erc20ABI = require('../../contracts/ERC20ABI.json')
 
@@ -46,8 +48,11 @@ function VaultModal( props ) {
         }
 
         if ((isLoading === false) && (isOpen)) {
-            checkShares()
-            checkBalance()
+            if (window.ethereum.networkVersion === GOERLI_NETWORK_ID) {
+                checkShares()
+                checkBalance()
+            }
+
         }
     
      }, [isLoading, isOpen, props.ethvault, props.token.decimals]);
@@ -60,6 +65,7 @@ function VaultModal( props ) {
         const receipt = await txn.wait();
         console.log("Success! Here is your reciept: ", receipt)
         setIsLoading(false)
+
     }
 
     async function permit() {
@@ -153,10 +159,63 @@ function VaultModal( props ) {
     //     console.log("Approved")
     //   }
     
-      async function withdraw(address, value) {
+    async function withdraw(address, value) {
 
 
-      }
+    }
+
+    // async function burn(value) {
+
+    //     console.log("Burning ...", value)
+
+    //     setIsLoading(true)
+    //     const normalisedAmount = ethers.utils.parseUnits(value, props.token.decimals)
+    //     let finalAmount = BigNumber.from(normalisedAmount)
+
+    //     const maticPOSClient = new MaticPOSClient({
+    //         network: "testnet",
+    //         version: "mumbai",
+    //         parentProvider: window.ethereum,
+    //         maticProvider: window.ethereum
+    //     });
+
+    //     let from = props.address // THE USER HAS TO BURN THEIR TOKEN TO RECIEVE IT ON THE OTHER SIDE
+    //     console.log(props.token.polygonAddress, finalAmount, from )
+
+    //     let reciept = await maticPOSClient.burnERC20(props.token.polygonAddress, finalAmount.toString(), { from });
+
+    //     console.log("Success! Here is your reciept: ", reciept)
+    //     setIsLoading(false)
+    // }
+
+    async function exit() {
+        console.log("Retrieving DAI....... ")
+        setIsLoading(true)
+        const posERC20Predicate = '0xdD6596F2029e6233DEFfaCa316e6A95217d4Dc34'
+        const POSRootChainManager = '0xBbD7cBFA79faee899Eaf900F13C9065bF03B1A74'
+        let from = props.address 
+
+        const maticPOSClient = new MaticPOSClient({
+            network: "testnet",
+            version: "mumbai",
+            parentProvider: window.ethereum,
+            maticProvider: "https://rpc-mumbai.maticvigil.com",
+            // posERC20Predicate: posERC20Predicate,
+            // posRootChainManager: POSRootChainManager,
+            // parentDefaultOptions: { from: from },
+            // maticDefaultOptions: { from: from }
+        });
+
+        let burnTxHash = "0x52dad223da5789a045f6121af503119c7170f688ba55ad4116f9ce71005e0526"
+
+
+        let reciept = await maticPOSClient.exitERC20(burnTxHash, { from });
+        
+        
+        console.log("Success! Here is your reciept: ", reciept)
+        setIsLoading(false)
+
+    }
 
     return (
       <>
@@ -193,8 +252,7 @@ function VaultModal( props ) {
             <Tabs align="center" variant="soft-rounded" colorScheme="blue">
                 <TabList>
                     <Tab>Overview</Tab>
-                    <Tab>Deposit</Tab>
-                    <Tab>Withdraw</Tab>
+                    <Tab>Actions</Tab>
                 </TabList>
 
                 <TabPanels>
@@ -244,7 +302,7 @@ function VaultModal( props ) {
                         </Button>
                     </TabPanel>
                     <TabPanel>
-                        <FormControl id="Deposit">
+                        <FormControl id="Actions">
                             <FormLabel>Amount</FormLabel>
                             <NumberInput
                                 onChange={(valueString) => setDepositValue(parse(valueString))}
@@ -259,35 +317,21 @@ function VaultModal( props ) {
                                 </NumberInputStepper>
                             </NumberInput>
                             <FormHelperText align="left">The amount of {props.token.symbol} you want to deposit</FormHelperText>
-                            <HStack spacing="24px" justify="center" pt="6">
-                                <Button isDisabled={isApproved} isLoading={isLoading} onClick = {() => permit() }> Permit </Button>
-                                {/* <Button isDisabled={isApproved} isLoading={isLoading} onClick = {() => approve(depositValue) }> Approve </Button> */}
-                                <Button isLoading={isLoading} onClick = {() => deposit(depositValue) }> Deposit </Button> 
-                                {/* <Button isDisabled={!isApproved} isLoading={isLoading} onClick = {() => depositWithPermit(depositValue) }> Deposit </Button> */}
-                            </HStack>
+                            {
+                                window.ethereum.networkVersion === GOERLI_NETWORK_ID ?
+                                    (<HStack spacing="24px" justify="center" pt="6">
+                                    
+                                        (<Button isDisabled={isApproved} isLoading={isLoading} onClick = {() => permit() }> Permit </Button>
+                                        <Button isLoading={isLoading} onClick = {() => deposit(depositValue) }> Deposit </Button> 
+                                        <Button isLoading={isLoading} onClick = {() => exit() }> Exit </Button> )
+                                    </HStack>)
+                                    :
+                                    (<HStack spacing="24px" justify="center" pt="6">
+                                        {/* (<Button isLoading={isLoading} onClick = {() => burn(depositValue) }> Burn </Button>) */}
+                                    </HStack>)
+                            }
                         </FormControl>
 
-                    </TabPanel>
-                    <TabPanel>
-                    <FormControl id="Withdraw">
-                        <FormLabel>Amount</FormLabel>
-                        <NumberInput
-                            onChange={(valueString) => setDepositValue(parse(valueString))}
-                            value={format(depositValue)}
-                            precision={3} step={0.001}
-                            min={0}
-                        >
-                            <NumberInputField />
-                            <NumberInputStepper>
-                                <NumberIncrementStepper />
-                                <NumberDecrementStepper />
-                            </NumberInputStepper>
-                        </NumberInput>
-                        <FormHelperText align="left">The amount of {props.token.symbol} you want to withdraw</FormHelperText>
-                        <HStack spacing="24px" justify="center" pt="6">
-                            <Button isLoading={isLoading} onClick = {() => withdraw(props.token.address, depositValue)} > Withdraw </Button>
-                        </HStack>
-                    </FormControl>
                     </TabPanel>
                 </TabPanels>
             </Tabs>

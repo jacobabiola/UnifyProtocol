@@ -4,20 +4,16 @@ import { PricingCard } from './PricingCard'
 
 export const VaultHome = (props) => {
 
-  var token = {
-    address: "0x6b175474e89094c44da98b954eedeac495271d0f",
-    symbol: "DAI",
-    image: "https://s2.coinmarketcap.com/static/img/coins/64x64/4943.png",
-    decimals: 18
-  }
-  var kovanToken = {
-    address: "0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa",
-    symbol: "DAI",
-    image: "https://s2.coinmarketcap.com/static/img/coins/64x64/4943.png",
-    decimals: 18
-  }
+  // var token = {
+  //   address: "0x6b175474e89094c44da98b954eedeac495271d0f",
+  //   polygonAddress: "0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063",
+  //   symbol: "DAI",
+  //   image: "https://s2.coinmarketcap.com/static/img/coins/64x64/4943.png",
+  //   decimals: 18
+  // }
   var goerliToken = {
     address: "0x76a245568c71C221a2Ce4a300359333ddd2ECa2c",
+    polygonAddress: "0x9848Cb1dB7259aeC5f096d4562f6FF2bfF1d5C0a",
     symbol: "DAI",
     image: "https://s2.coinmarketcap.com/static/img/coins/64x64/4943.png",
     decimals: 18
