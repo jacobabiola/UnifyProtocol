@@ -9,10 +9,10 @@ import EthVaultArtifact from "./contracts/ETHVault.json";
 import contractAddress from "./contracts/contract-address.json";
 import { VaultHome } from './components/VaultUI/VaultHome'
 
-const HARDHAT_NETWORK_ID = '31337';
+export const HARDHAT_NETWORK_ID = '31337';
 // const KOVAN_NETWORK_ID = '42';
-const GOERLI_NETWORK_ID = '5';
-const MUMBAI_NETWORK_ID = '80001'
+export const GOERLI_NETWORK_ID = '5';
+export const MUMBAI_NETWORK_ID = '80001'
 // const ETHEREUM_NETWORK_ID = '1';
 // const POLYGON_NETWORK_ID = '137';
 
@@ -126,7 +126,14 @@ function App() {
       setNetworkError(false)
       return true;
     }
+    else if (window.ethereum.networkVersion === "1") {
+      console.log( "Connected to Ethereum ", window.ethereum.networkVersion )
+      setNetworkName("Ethereum")
+      setNetworkError(false)
+      return true;
+    }
     else {
+      console.log("Wrong Network: ", window.ethereum.networkVersion)
       setNetworkError(true)
       return false
     }
