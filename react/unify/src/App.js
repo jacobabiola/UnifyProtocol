@@ -23,6 +23,7 @@ function App() {
   const [ethVaultContract, setEthVaultContract] = useState(undefined)
   const [networkError, setNetworkError] = useState(false)
   const [networkName, setNetworkName] = useState(undefined)
+  const [networkTokens, setNetworkTokens] = useState(undefined)
 
   if (selectedAddress === undefined) {
     return (
@@ -53,6 +54,7 @@ function App() {
           address={selectedAddress}
           provider={provider}
           networkname={networkName}
+          networktokens={networkTokens}
         />
       </Container>
     );
@@ -94,11 +96,27 @@ function App() {
     if (window.ethereum.networkVersion === GOERLI_NETWORK_ID) {   
       console.log( "Connected to Goerli ", window.ethereum.networkVersion )
       setNetworkName("Goerli")
+      setNetworkTokens({
+        DAI: {
+          address: "0x2686eca13186766760a0347ee8eeb5a88710e11b",
+          symbol: "DAI",
+          image: "https://s2.coinmarketcap.com/static/img/coins/64x64/4943.png",
+          decimals: 18,
+        },
+      });
       setNetworkError(false)
       return true;
     } else if (window.ethereum.networkVersion === MUMBAI_NETWORK_ID) {
       console.log( "Connected to Mumbai ", window.ethereum.networkVersion )
       setNetworkName("Mumbai")
+      setNetworkTokens({
+        DAI: {
+          address: "0x27a44456bEDb94DbD59D0f0A14fE977c777fC5C3",
+          symbol: "DAI",
+          image: "https://s2.coinmarketcap.com/static/img/coins/64x64/4943.png",
+          decimals: 18,
+        },
+      });
       setNetworkError(false)
       return true;
     } 

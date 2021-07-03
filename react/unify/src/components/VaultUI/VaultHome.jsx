@@ -17,7 +17,7 @@ export const VaultHome = (props) => {
     decimals: 18
   }
   var goerliToken = {
-    address: "0x76a245568c71C221a2Ce4a300359333ddd2ECa2c",
+    address: "0x2686eca13186766760a0347ee8eeb5a88710e11b",
     symbol: "DAI",
     image: "https://s2.coinmarketcap.com/static/img/coins/64x64/4943.png",
     decimals: 18
@@ -102,6 +102,7 @@ export const VaultHome = (props) => {
 
             ]}
             token={goerliToken}
+            networktokens={props.networktokens}
             ethvault={props.ethvault}
             address={props.address}
             provider={props.provider}

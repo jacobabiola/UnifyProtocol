@@ -7,10 +7,18 @@ import { NumberInput, NumberInputField, NumberInputStepper, NumberIncrementStepp
 import contractAddress from "../../contracts/contract-address.json";
 import { StatCard } from "../Stat"
 import { signDaiPermit } from 'eth-permit';
+import { Hyphen } from "@biconomy/hyphen";
+import { RESPONSE_CODES } from "@biconomy/hyphen";
 
 const erc20ABI = require('../../contracts/ERC20ABI.json')
 
+
 function VaultModal( props ) {
+
+    const HARDHAT_NETWORK_ID = '31337';
+    // const KOVAN_NETWORK_ID = '42';
+    const GOERLI_NETWORK_ID = '5';
+    const MUMBAI_NETWORK_ID = '80001'
 
     const [isLoading, setIsLoading] = useState(false) 
     const [isApproved, setIsApproved] = useState(false)
@@ -153,9 +161,96 @@ function VaultModal( props ) {
     //     console.log("Approved")
     //   }
     
-      async function withdraw(address, value) {
+      async function withdraw(address, pValue) {
+        console.log(`⚠️ Make sure your provider is on the Polygon side`);
+        var withdrawDetails = {
+          // tokenAddress: props.token.address, same as param
+          tokenAddress: address,
+          senderAddress: props.address,
+          spender: contractAddress.ETHVault,
+          value: BigNumber.from(
+            ethers.utils.parseUnits(pValue, props.token.decimals)
+          ),
+        };
+        const hyphenDepositDetails = {
+          sender: props.address,
+          receiver: props.address,
+          tokenAddress: address,
+          depositContractAddress: "0xdC3DB0281E78A9C565D326ACE0A430478C7193b5", // MUMBAI - LiquidityPoolManager - https://docs.biconomy.io/products/hyphen-instant-cross-chain-transfers/contract-addresses
+          amount: withdrawDetails.value,
+          fromChainId: MUMBAI_NETWORK_ID,
+          toChainId: GOERLI_NETWORK_ID,
+        };
+        setIsLoading(true);
+        try {
+          let hyphen = new Hyphen(props.provider, {
+            debug: true, // If 'true', it prints debug logs on console window
+            environment: "test", // It can be "test" or "prod"
+            onFundsTransfered: (data) => {
+              setIsLoading(false);
+              console.log("Transferred!");
+            },
+          });
 
+          await hyphen.init();
 
+          await biconomyPreChecks(hyphen, withdrawDetails);
+
+          let depositTx = await hyphen.deposit(hyphenDepositDetails);
+
+          // Wait for 1 block confirmation
+          await depositTx.wait(1);
+        } catch (error) {
+          setIsLoading(false);
+          console.error(error);
+        }
+      }
+
+      async function biconomyPreChecks(hyphen, withdrawDetails) {
+        let preTransferStatus = await hyphen.preDepositStatus({
+          tokenAddress: withdrawDetails.tokenAddress, // Token address on fromChain which needs to be transferred
+          amount: withdrawDetails.value, // Amount of tokens to be transferred in smallest unit eg wei
+          fromChainId: MUMBAI_NETWORK_ID, // Chain id from where tokens needs to be transferred
+          toChainId: GOERLI_NETWORK_ID, // Chain id where tokens are supposed to be sent
+          userAddress: withdrawDetails.senderAddress, // User wallet address who want's to do the transfer
+        });
+        let hyphenError = `UNKNOWN`;
+
+        if (preTransferStatus.code === RESPONSE_CODES.OK) {
+          // ✅ ALL CHECKS PASSED. Proceed to do deposit transaction
+          return;
+        } else if (
+          preTransferStatus.code === RESPONSE_CODES.ALLOWANCE_NOT_GIVEN
+        ) {
+          // ❌ Not enough apporval from user address on LiquidityPoolManager contract on fromChain
+          let approveTx = await hyphen.approveERC20(
+            withdrawDetails.tokenAddress,
+            preTransferStatus.depositContract,
+            withdrawDetails.value.toString()
+          );
+
+          // ⏱Wait for transaction to confirm, pass number of blocks to wait as param
+          await approveTx.wait(2);
+
+          // NOTE: Whenever there is a transaction done via SDK, all responses
+          // will be ethers.js compatible with an async wait() function that
+          // can be called with 'await' to wait for transaction confirmation.
+          return;
+        } else {
+          if (preTransferStatus.code === RESPONSE_CODES.UNSUPPORTED_NETWORK) {
+            hyphenError = `❌ Target chain id is not supported yet`;
+          } else if (preTransferStatus.code === RESPONSE_CODES.NO_LIQUIDITY) {
+            hyphenError = `❌ No liquidity available on target chain for given token`;
+          } else if (
+            preTransferStatus.code === RESPONSE_CODES.UNSUPPORTED_TOKEN
+          ) {
+            hyphenError = `❌ Requested token is not supported on fromChain yet`;
+          } else {
+            hyphenError = `❌ Any other unexpected error`;
+          }
+          console.error(hyphenError);
+          throw hyphenError;
+        }
       }
 
     return (
@@ -285,7 +380,9 @@ function VaultModal( props ) {
                         </NumberInput>
                         <FormHelperText align="left">The amount of {props.token.symbol} you want to withdraw</FormHelperText>
                         <HStack spacing="24px" justify="center" pt="6">
-                            <Button isLoading={isLoading} onClick = {() => withdraw(props.token.address, depositValue)} > Withdraw </Button>
+                            <Button isLoading={isLoading} onClick = {() => 
+                                withdraw(props.networktokens[props.tokenname].address.toString().toLowerCase(), depositValue)} 
+                            > Withdraw </Button>
                         </HStack>
                     </FormControl>
                     </TabPanel>

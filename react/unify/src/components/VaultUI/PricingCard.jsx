@@ -115,11 +115,13 @@ export const PricingCard = (props) => {
 
       <VaultModal
         disabled={!popular}
-        token = { props.token }
+        token={props.token}
+        tokenname={name}
+        networktokens={props.networktokens}
         ethvault={props.ethvault}
         address={props.address}
         provider={props.provider}
       />
     </PricingWrapper>
-  )
+  );
 }
