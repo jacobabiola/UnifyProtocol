@@ -4,11 +4,22 @@ import { SimpleGrid, Text, Image, VStack, HStack, Button, FormControl, FormLabel
 import { Tabs, TabList, TabPanels, Tab, TabPanel } from "@chakra-ui/react"
 import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalCloseButton } from "@chakra-ui/react"
 import { NumberInput, NumberInputField, NumberInputStepper, NumberIncrementStepper, NumberDecrementStepper  } from "@chakra-ui/react"
-import contractAddress from "../../contracts/contract-address.json";
 import { StatCard } from "../Stat"
 import { signDaiPermit } from 'eth-permit';
 import { GOERLI_NETWORK_ID } from '../../App';
 import { MaticPOSClient } from '@maticnetwork/maticjs'
+import EthVaultArtifact from "../../contracts/ETHVault.json";
+import PolygonVaultArtifact from "../../contracts/PolygonVault.json";
+import contractAddress from "../../contracts/contract-address.json";
+
+const { DefenderRelaySigner, DefenderRelayProvider } = require('defender-relay-client/lib/ethers');
+const ethCredentials = {apiKey: "44Up9G8XrPJTbq68K77xif16pNXbk2A3", apiSecret: "55n3dmrb28o5ZrKvmDrojVNKfei2gvAMvjS5TFKybzZdL2J482esHkMXtegD9VjM"}
+const ethRelayProvider = new DefenderRelayProvider(ethCredentials);
+const ethRelaySigner = new DefenderRelaySigner(ethCredentials, ethRelayProvider, { speed: 'fast' });
+
+const polyCredentials = {apiKey: "2CHTi6r4c1qiKxmUBz7CNT9da9jiRxnf", apiSecret: "63wJ5TDZHLYUotHZkwg9T5KjgDE8cLxsZ5SEDQgkR5Nqqg4MHx9Qbs1NySqGdXkT"}
+const polyRelayProvider = new DefenderRelayProvider(polyCredentials);
+const polyRelaySigner = new DefenderRelaySigner(polyCredentials, polyRelayProvider, { speed: 'fast' });
 
 const erc20ABI = require('../../contracts/ERC20ABI.json')
 
@@ -57,13 +68,58 @@ function VaultModal( props ) {
     
      }, [isLoading, isOpen, props.ethvault, props.token.decimals]);
 
-    async function moveTokenToPolygon() {
+    // async function moveTokenToPolygon() {
+    //     setIsLoading(true)
+    //     console.log("Transfering token to Polygon")
+    //     let addressOnPolygonSide = props.address // For now its just the person who activates the transfer
+    //     let txn = await props.ethvault.moveFundsToPolygon(addressOnPolygonSide, {gasLimit: 2000000})
+    //     const receipt = await txn.wait();
+    //     console.log("Success! Here is your reciept: ", receipt)
+    //     setIsLoading(false)
+
+    // }
+
+    async function moveTokensPolygon() {
         setIsLoading(true)
-        console.log("Transfering token to Polygon")
-        let addressOnPolygonSide = props.address // For now its just the person who activates the transfer
-        let txn = await props.ethvault.moveFundsToPolygon(addressOnPolygonSide, {gasLimit: 2000000})
+        console.log("Transfering tokens to Polygon")
+        // Initialise Contract
+        let ethVault = new ethers.Contract(
+            contractAddress.ETHVault,
+            EthVaultArtifact.abi,
+            ethRelaySigner
+        );
+        let txn = await ethVault.moveAllBalancesToPolygon({gasLimit: 2000000})
         const receipt = await txn.wait();
         console.log("Success! Here is your reciept: ", receipt)
+        setIsLoading(false)
+    }
+
+    async function relayPermitAndMoveFunds(value) {
+        setIsLoading(true)
+
+        console.log("Permitting relay....")
+
+        const normalisedAmount = ethers.utils.parseUnits(value, props.token.decimals)
+        let finalAmount = BigNumber.from(normalisedAmount)
+
+        // Ask you to permit us to transfer funds
+        const result = await signDaiPermit(window.ethereum, permitDetails.tokenAddress, permitDetails.senderAddress, permitDetails.spender);
+        console.log("Signature is: ")
+        console.log(result)
+
+        // Initialise Contract
+        let ethVault = new ethers.Contract(
+            contractAddress.ETHVault,
+            EthVaultArtifact.abi,
+            ethRelaySigner
+        );
+
+        let txn = await ethVault.depositWithPermit(finalAmount, permitDetails.senderAddress, permitDetails.spender, result.nonce, result.expiry, true, result.v, result.r, result.s, {gasLimit: 2000000})
+
+
+        const receipt = await txn.wait();
+        console.log("Success! Here is your reciept: ", receipt)
+
         setIsLoading(false)
 
     }
@@ -74,10 +130,6 @@ function VaultModal( props ) {
         console.log("Getting signature....")
         console.log(window.ethereum, permitDetails.tokenAddress, permitDetails.senderAddress, permitDetails.spender);
 
-        // // These are optional but signDaiPermit isnt working on Goerli without it
-        // let expiry = undefined
-        // let nonce = undefined
-        // const result = await signDaiPermit(window.ethereum, permitDetails.tokenAddress, permitDetails.senderAddress, permitDetails.spender, expiry, nonce);
         const result = await signDaiPermit(window.ethereum, permitDetails.tokenAddress, permitDetails.senderAddress, permitDetails.spender);
         console.log(result)
 
@@ -88,7 +140,8 @@ function VaultModal( props ) {
         let DAI = new ethers.Contract(
             props.token.address,
             abi,
-            props.provider.getSigner()
+            // props.provider.getSigner()
+            ethRelaySigner
         );
 
         console.log(permitDetails.senderAddress, permitDetails.spender, result.nonce, result.expiry, true, result.v, result.r, result.s)
@@ -164,55 +217,114 @@ function VaultModal( props ) {
 
     }
 
-    // async function burn(value) {
+    async function burn(value) {
 
-    //     console.log("Burning ...", value)
+        console.log("Burning ...", value)
 
+        setIsLoading(true)
+        const normalisedAmount = ethers.utils.parseUnits(value, props.token.decimals)
+        let finalAmount = BigNumber.from(normalisedAmount)
+
+        const maticPOSClient = new MaticPOSClient({
+            network: "testnet",
+            version: "mumbai",
+            parentProvider: window.ethereum,
+            maticProvider: window.ethereum
+        });
+
+        let from = props.address // THE USER HAS TO BURN THEIR TOKEN TO RECIEVE IT ON THE OTHER SIDE
+        console.log(props.token.polygonAddress, finalAmount, from )
+
+        let reciept = await maticPOSClient.burnERC20(props.token.polygonAddress, finalAmount.toString(), { from });
+        
+        console.log("Success! Here is your reciept: ", reciept)
+        let burnTxnHash = reciept.transactionHash
+
+        // NOW WE ARE GOING TO ADD THE BURN TRANSACTION TO THE POLGON CONTRACT USING POLYGON RELAY
+        let polygonVault = new ethers.Contract(
+            contractAddress.PolygonVault,
+            PolygonVaultArtifact.abi,
+            polyRelaySigner
+        );
+
+        let txn = await polygonVault.addHash( burnTxnHash ,{gasLimit: 2000000})
+        const receipt = await txn.wait();
+        console.log("Success! Here is your reciept: ", receipt)
+
+        setIsLoading(false)
+    }
+
+    // async function exit() {
+    //     console.log("Retrieving DAI....... ")
     //     setIsLoading(true)
-    //     const normalisedAmount = ethers.utils.parseUnits(value, props.token.decimals)
-    //     let finalAmount = BigNumber.from(normalisedAmount)
+    //     let from = props.address 
 
     //     const maticPOSClient = new MaticPOSClient({
     //         network: "testnet",
     //         version: "mumbai",
     //         parentProvider: window.ethereum,
-    //         maticProvider: window.ethereum
+    //         maticProvider: "https://rpc-mumbai.maticvigil.com",
     //     });
 
-    //     let from = props.address // THE USER HAS TO BURN THEIR TOKEN TO RECIEVE IT ON THE OTHER SIDE
-    //     console.log(props.token.polygonAddress, finalAmount, from )
+    //     let burnTxHash = "0x52dad223da5789a045f6121af503119c7170f688ba55ad4116f9ce71005e0526"
 
-    //     let reciept = await maticPOSClient.burnERC20(props.token.polygonAddress, finalAmount.toString(), { from });
 
+    //     let reciept = await maticPOSClient.exitERC20(burnTxHash, { from });
+        
+        
     //     console.log("Success! Here is your reciept: ", reciept)
     //     setIsLoading(false)
+
     // }
 
     async function exit() {
-        console.log("Retrieving DAI....... ")
+        console.log("Retrieving All users DAI....... ")
         setIsLoading(true)
-        const posERC20Predicate = '0xdD6596F2029e6233DEFfaCa316e6A95217d4Dc34'
-        const POSRootChainManager = '0xBbD7cBFA79faee899Eaf900F13C9065bF03B1A74'
-        let from = props.address 
 
         const maticPOSClient = new MaticPOSClient({
             network: "testnet",
             version: "mumbai",
             parentProvider: window.ethereum,
             maticProvider: "https://rpc-mumbai.maticvigil.com",
-            // posERC20Predicate: posERC20Predicate,
-            // posRootChainManager: POSRootChainManager,
-            // parentDefaultOptions: { from: from },
-            // maticDefaultOptions: { from: from }
         });
 
-        let burnTxHash = "0x52dad223da5789a045f6121af503119c7170f688ba55ad4116f9ce71005e0526"
+        let polygonVault = new ethers.Contract(
+            contractAddress.PolygonVault,
+            PolygonVaultArtifact.abi,
+            polyRelaySigner
+        );
 
+        let burnTxnHashes = await polygonVault.getHashes({gasLimit: 2000000})
+        console.log("We got the hashes: ", burnTxnHashes)
+        
+        let from = props.address
+        let proofs = []
 
-        let reciept = await maticPOSClient.exitERC20(burnTxHash, { from });
+        for (const txnHash of burnTxnHashes){
+            try {
+                let proof = await maticPOSClient.exitERC20(txnHash, { from, encodeAbi: true });
+                console.log(proof)
+                proofs.push(proof.data)
+            }
+            catch(err) {
+                console.log('Error but keep going: ', err); 
+            }    
+
+        } 
         
+
+                // Initialise Contract
+        let ethVault = new ethers.Contract(
+            contractAddress.ETHVault,
+            EthVaultArtifact.abi,
+            ethRelaySigner
+        );
         
-        console.log("Success! Here is your reciept: ", reciept)
+        let txn = await ethVault.bringAllBalancesBackToEth(proofs, {gasLimit: 2000000})
+        const receipt = await txn.wait();
+        console.log("Success! Here is your reciept: ", receipt)
+        
+        // console.log("Success! Here is your reciept: ", reciept)
         setIsLoading(false)
 
     }
@@ -297,7 +409,7 @@ function VaultModal( props ) {
                                     } 
                             } />
                         </SimpleGrid>
-                        <Button isLoading={isLoading} onClick={() => moveTokenToPolygon()} mt={10}>
+                        <Button isLoading={isLoading} onClick={() => moveTokensPolygon()} mt={10}>
                             Move to Polygon
                         </Button>
                     </TabPanel>
@@ -321,13 +433,13 @@ function VaultModal( props ) {
                                 window.ethereum.networkVersion === GOERLI_NETWORK_ID ?
                                     (<HStack spacing="24px" justify="center" pt="6">
                                     
-                                        (<Button isDisabled={isApproved} isLoading={isLoading} onClick = {() => permit() }> Permit </Button>
+                                        (<Button isDisabled={isApproved} isLoading={isLoading} onClick = {() => relayPermitAndMoveFunds(depositValue) }> Permit </Button>
                                         <Button isLoading={isLoading} onClick = {() => deposit(depositValue) }> Deposit </Button> 
                                         <Button isLoading={isLoading} onClick = {() => exit() }> Exit </Button> )
                                     </HStack>)
                                     :
                                     (<HStack spacing="24px" justify="center" pt="6">
-                                        {/* (<Button isLoading={isLoading} onClick = {() => burn(depositValue) }> Burn </Button>) */}
+                                        (<Button isLoading={isLoading} onClick = {() => burn(depositValue) }> Burn </Button>)
                                     </HStack>)
                             }
                         </FormControl>

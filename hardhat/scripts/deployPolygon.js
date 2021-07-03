@@ -15,13 +15,14 @@ async function main() {
   console.log("---------- DEPLOYING POLYGON CONTRACTS ------------")
 
   // We get the contract to deploy
-  const Greeter = await hre.ethers.getContractFactory("Greeter");
-  const greeter = await Greeter.deploy("Hello, this is data from a smart contract!");
+  const PolygonVault = await hre.ethers.getContractFactory("PolygonVault");
+  const polygonVault = await PolygonVault.deploy();
 
-  await greeter.deployed();
+  await polygonVault.deployed();
 
-  console.log("Greeter deployed to:", greeter.address);
-  // saveFrontendFiles("Greeter", greeter)
+  console.log("PolygonVault deployed to:", polygonVault.address);
+  saveFrontendFiles("PolygonVault", polygonVault)
+  
 }
 
 function saveFrontendFiles(name, token) {

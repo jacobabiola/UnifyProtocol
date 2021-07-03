@@ -15,17 +15,9 @@ async function main() {
   // await hre.run('compile');
 
   // let DAI = "0x6b175474e89094c44da98b954eedeac495271d0f" // DAI Address MAINNET
-  let DAI = "0x76a245568c71C221a2Ce4a300359333ddd2ECa2c" // DAI address Goerli
 
   console.log("---------- DEPLOYING ETH CONTRACTS ------------")
-  // We get the contract to deploy
-  // const Greeter = await hre.ethers.getContractFactory("Greeter");
-  // const greeter = await Greeter.deploy("Hello, this is data from a smart contract!");
-
-  // await greeter.deployed();
-  // console.log("Greeter deployed to:", greeter.address);
-  // saveFrontendFiles("Greeter", greeter)
-
+  let DAI = "0x76a245568c71C221a2Ce4a300359333ddd2ECa2c" // DAI address Goerli
   const ETHVault = await hre.ethers.getContractFactory("ETHVault");
   const ethVault = await ETHVault.deploy("DAI Vault ETH", DAI);
 
