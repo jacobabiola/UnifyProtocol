@@ -349,6 +349,7 @@ function VaultModal( props ) {
                 <TabList>
                     <Tab>Overview</Tab>
                     <Tab>Actions</Tab>
+                    <Tab>Withdraw</Tab>
                 </TabList>
 
                 <TabPanels>
