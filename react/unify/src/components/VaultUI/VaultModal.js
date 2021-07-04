@@ -182,7 +182,8 @@ function VaultModal( props ) {
           sender: props.address,
           receiver: props.address,
           tokenAddress: address,
-          depositContractAddress: "0xdC3DB0281E78A9C565D326ACE0A430478C7193b5", // MUMBAI - LiquidityPoolManager - https://docs.biconomy.io/products/hyphen-instant-cross-chain-transfers/contract-addresses
+        //   depositContractAddress: "0xdC3DB0281E78A9C565D326ACE0A430478C7193b5", // MUMBAI - LiquidityPoolManager - https://docs.biconomy.io/products/hyphen-instant-cross-chain-transfers/contract-addresses
+          depositContractAddress: "0xf458fBA2c37e2bA50e7c853E18390769E9bE49Ef", // MUMBAI - LiquidityPoolManager - SDK
           amount: withdrawDetails.value,
           fromChainId: MUMBAI_NETWORK_ID,
           toChainId: GOERLI_NETWORK_ID,
@@ -200,7 +201,7 @@ function VaultModal( props ) {
 
           await hyphen.init();
 
-          await biconomyPreChecks(hyphen, withdrawDetails);
+          await biconomyPreChecks(hyphen, withdrawDetails, hyphenDepositDetails.depositContractAddress);
 
           let depositTx = await hyphen.deposit(hyphenDepositDetails);
 
@@ -212,7 +213,7 @@ function VaultModal( props ) {
         }
       }
 
-      async function biconomyPreChecks(hyphen, withdrawDetails) {
+      async function biconomyPreChecks(hyphen, withdrawDetails, liquidityPoolManagerAddy) {
         let preTransferStatus = await hyphen.preDepositStatus({
           tokenAddress: withdrawDetails.tokenAddress, // Token address on fromChain which needs to be transferred
           amount: withdrawDetails.value, // Amount of tokens to be transferred in smallest unit eg wei
@@ -224,7 +225,20 @@ function VaultModal( props ) {
 
         if (preTransferStatus.code === RESPONSE_CODES.OK) {
           // ✅ ALL CHECKS PASSED. Proceed to do deposit transaction
-          return;
+          //double verify if allowance is enough
+          const currAllow = await hyphen.getERC20Allowance(withdrawDetails.tokenAddress,props.address,liquidityPoolManagerAddy);
+          if(BigNumber.from(currAllow).lt(BigNumber.from(withdrawDetails.value))) {
+            console.log(withdrawDetails.value.toString())
+            let approveTx = await hyphen.approveERC20(
+                withdrawDetails.tokenAddress,
+                preTransferStatus.depositContract,
+                withdrawDetails.value.toString()
+              );
+    
+              // ⏱Wait for transaction to confirm, pass number of blocks to wait as param
+              return approveTx.wait(2);
+          }
+          else return;
         } else if (
           preTransferStatus.code === RESPONSE_CODES.ALLOWANCE_NOT_GIVEN
         ) {
