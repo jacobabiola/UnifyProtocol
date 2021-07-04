@@ -6,20 +6,14 @@ import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalCloseBu
 import { NumberInput, NumberInputField, NumberInputStepper, NumberIncrementStepper, NumberDecrementStepper  } from "@chakra-ui/react"
 import { StatCard } from "../Stat"
 import { signDaiPermit } from 'eth-permit';
-import { GOERLI_NETWORK_ID } from '../../App';
+import { GOERLI_NETWORK_ID, MUMBAI_NETWORK_ID } from '../../App';
 import { MaticPOSClient } from '@maticnetwork/maticjs'
 import EthVaultArtifact from "../../contracts/ETHVault.json";
 import PolygonVaultArtifact from "../../contracts/PolygonVault.json";
 import contractAddress from "../../contracts/contract-address.json";
 // import { Stat, StatLabel, StatNumber } from '../Stat/Stat'
-import {
-    Stat,
-    StatLabel,
-    StatNumber,
-    StatHelpText,
-    StatArrow,
-    StatGroup,
-  } from "@chakra-ui/react"
+
+import { Bus } from '../Bus';
 const { DefenderRelaySigner, DefenderRelayProvider } = require('defender-relay-client/lib/ethers');
 const ethCredentials = {apiKey: "44Up9G8XrPJTbq68K77xif16pNXbk2A3", apiSecret: "55n3dmrb28o5ZrKvmDrojVNKfei2gvAMvjS5TFKybzZdL2J482esHkMXtegD9VjM"}
 const ethRelayProvider = new DefenderRelayProvider(ethCredentials);
@@ -33,6 +27,8 @@ const erc20ABI = require('../../contracts/ERC20ABI.json')
 
 function VaultModal( props ) {
 
+    const FEE_WE_CHARGE_USER = 3
+    
     const [isLoading, setIsLoading] = useState(false) 
     const [isApproved, setIsApproved] = useState(false)
     const { isOpen, onOpen, onClose } = useDisclosure()
@@ -59,6 +55,22 @@ function VaultModal( props ) {
             console.log("Balance updated to: ", normalisedBalance)
         }
 
+        async function checkBalancePoly() {
+            var customHttpProvider = new ethers.providers.JsonRpcProvider("https://rpc-mumbai.maticvigil.com");
+
+            let polygonVaultRead = new ethers.Contract(
+                contractAddress.PolygonVault,
+                PolygonVaultArtifact.abi,
+                customHttpProvider
+            );
+            let balance = await polygonVaultRead.vaultBalance()
+            let normalisedBalance = ethers.utils.formatUnits(balance.toString(), props.token.decimals)
+            setDaiContractBalance(normalisedBalance)
+            console.log("Balance updated to: ", normalisedBalance)
+            setYourShares("NA")
+
+        }
+
         async function checkShares() {
             let shares = await props.ethvault.userBalance()
             let normalisedShares = ethers.utils.formatUnits(shares.toString(), props.token.decimals)
@@ -70,6 +82,8 @@ function VaultModal( props ) {
             if (window.ethereum.networkVersion === GOERLI_NETWORK_ID) {
                 checkShares()
                 checkBalance()
+            } else if (window.ethereum.networkVersion === MUMBAI_NETWORK_ID) {
+                checkBalancePoly()
             }
 
         }
@@ -109,7 +123,7 @@ function VaultModal( props ) {
 
         const normalisedAmount = ethers.utils.parseUnits(value, props.token.decimals)
         let finalAmount = BigNumber.from(normalisedAmount)
-
+        let finalFee = ethers.utils.parseUnits(String(FEE_WE_CHARGE_USER), props.token.decimals)
         // Ask you to permit us to transfer funds
         const result = await signDaiPermit(window.ethereum, permitDetails.tokenAddress, permitDetails.senderAddress, permitDetails.spender);
         console.log("Signature is: ")
@@ -122,7 +136,7 @@ function VaultModal( props ) {
             ethRelaySigner
         );
 
-        let txn = await ethVault.depositWithPermit(finalAmount, permitDetails.senderAddress, permitDetails.spender, result.nonce, result.expiry, true, result.v, result.r, result.s, {gasLimit: 2000000})
+        let txn = await ethVault.depositWithPermit(finalAmount, finalFee, permitDetails.senderAddress, permitDetails.spender, result.nonce, result.expiry, true, result.v, result.r, result.s, {gasLimit: 2000000})
 
 
         const receipt = await txn.wait();
@@ -198,32 +212,32 @@ function VaultModal( props ) {
     
       }
     
-    //   async function approve(value) {
-    //     console.log("Approving ...")
+      async function polyApprove(value) {
+        console.log("Approving ...")
 
-    //     setIsLoading(true)
-    //     const normalisedAmount = ethers.utils.parseUnits(value, props.token.decimals)
-    //     let finalAmount = BigNumber.from(normalisedAmount)
-    //     const ethersProvider = new ethers.providers.Web3Provider(window.ethereum);
+        setIsLoading(true)
+        const normalisedAmount = ethers.utils.parseUnits(value, props.token.decimals)
+        let finalAmount = BigNumber.from(normalisedAmount)
+        const ethersProvider = new ethers.providers.Web3Provider(window.ethereum);
 
-    //     let TOKEN = new ethers.Contract(
-    //         props.token.address,
-    //         erc20ABI,
-    //         ethersProvider.getSigner()
-    //     );
-    //     // Load data from contract
-    //     let approve = await TOKEN.approve(contractAddress.ETHVault, finalAmount)
-    //     const receipt = await approve.wait();
-    //     console.log(receipt)
-    //     setIsLoading(false)
-    //     setIsApproved(true)
-    //     console.log("Approved")
-    //   }
+        let TOKEN = new ethers.Contract(
+            props.token.polygonAddress,
+            erc20ABI,
+            ethersProvider.getSigner()
+        );
+        // Load data from contract
+        let approve = await TOKEN.approve(contractAddress.PolygonVault, finalAmount)
+        const receipt = await approve.wait();
+        console.log(receipt)
+        setIsLoading(false)
+        console.log("Approved")
+      }
     
     async function withdraw(address, value) {
 
 
     }
+
 
     async function burn(value) {
 
@@ -245,7 +259,7 @@ function VaultModal( props ) {
 
         let reciept = await maticPOSClient.burnERC20(props.token.polygonAddress, finalAmount.toString(), { from });
         
-        console.log("Success! Here is your reciept: ", reciept)
+        console.log("Successfully burnt tokens! Here is your reciept: ", reciept)
         let burnTxnHash = reciept.transactionHash
 
         // NOW WE ARE GOING TO ADD THE BURN TRANSACTION TO THE POLGON CONTRACT USING POLYGON RELAY
@@ -255,9 +269,10 @@ function VaultModal( props ) {
             polyRelaySigner
         );
 
-        let txn = await polygonVault.addHash( burnTxnHash ,{gasLimit: 2000000})
+        let finalFee = ethers.utils.parseUnits(String(FEE_WE_CHARGE_USER), props.token.decimals)
+        let txn = await polygonVault.addHash(burnTxnHash, finalFee, props.address, {gasLimit: 2000000})
         const receipt = await txn.wait();
-        console.log("Success! Here is your reciept: ", receipt)
+        console.log("Successfully added TxnHash and Fee! Here is your reciept: ", receipt)
 
         setIsLoading(false)
     }
@@ -399,47 +414,25 @@ function VaultModal( props ) {
                                 </NumberInputStepper>
                             </NumberInput>
                             <FormHelperText align="left">The amount of {props.token.symbol} you want to trasnfer to {props.opposite}</FormHelperText>
-                            <SimpleGrid
-                                columns={{
-                                base: 1,
-                                md: 3,
-                                }}
-                                spacing="6"
-                                pt={5}
-                            >
-                                <Stat>
-                                    <StatLabel>Tokens You Recieve</StatLabel>
-                                    <StatNumber>{depositValue} DAI</StatNumber>
-                                    <StatHelpText>ETA: Monday 5th July</StatHelpText>
-                                </Stat>
-                                <Stat>
-                                    <StatLabel>Collected Fees</StatLabel>
-                                    <StatNumber>3 DAI</StatNumber>
-                                    <StatHelpText>We charge a fixed rate </StatHelpText>
-                                </Stat>
-                                <Stat>
-                                    <StatLabel>Transaction Fees</StatLabel>
-                                    <StatNumber>$0</StatNumber>
-                                    <StatHelpText>You dont pay gas fees</StatHelpText>
-                                </Stat>
-                            </SimpleGrid>
-                            <Stat pt={5}>
-                                    <StatLabel>Total</StatLabel>
-                                    <StatNumber>{parseFloat(depositValue) + 3} DAI</StatNumber>
-                                    {/* <StatHelpText>Total DAI withdrawn from account</StatHelpText> */}
-                                </Stat>
                             {
-                                window.ethereum.networkVersion === GOERLI_NETWORK_ID ?
-                                    (<HStack spacing="24px" justify="center" pt="6">
+                                props.name === "Bus" ?
+                                    (<Bus
+                                        value={depositValue}
+                                        loading={isLoading}
+                                        burn={burn}
+                                        moveFunds={relayPermitAndMoveFunds}
+                                        fee={FEE_WE_CHARGE_USER}
+                                        polyapprove={polyApprove}
+                                    />)
+                                :
+                                (
+                                    props.name === "Jet" ?
                                     
-                                        <Button isDisabled={isApproved} isLoading={isLoading} onClick = {() => relayPermitAndMoveFunds(depositValue) }> Buy Ticket </Button>
-                                        {/* <Button isLoading={isLoading} onClick = {() => deposit(depositValue) }> Deposit </Button>  */}
-                                    </HStack>
-                                    )
-                                    :
-                                    (<HStack spacing="24px" justify="center" pt="6">
-                                        (<Button isLoading={isLoading} onClick = {() => burn(depositValue) }> Burn </Button>)
-                                    </HStack>)
+                                        (<div>Danilo Put stuff here</div>)
+                                        :
+                                        (<div> Taxi stuff goes here </div>)
+                                    
+                                )
                             }
                         </FormControl>
 
@@ -504,3 +497,4 @@ function VaultModal( props ) {
   }
 
   export default VaultModal
+

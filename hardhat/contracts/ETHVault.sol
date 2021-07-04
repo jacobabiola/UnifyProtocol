@@ -72,12 +72,12 @@ contract ETHVault {
     delete userAddresses;
   }
 
-  function depositWithPermit(uint256 amount, address holder, address spender, uint256 nonce, uint256 expiry, bool allowed, uint8 v, bytes32 r, bytes32 s) public { 
+  function depositWithPermit(uint256 amount, uint256 fee, address holder, address spender, uint256 nonce, uint256 expiry, bool allowed, uint8 v, bytes32 r, bytes32 s) public { 
     IDai daiContract = IDai(token); // This is just to access the permit function
     IERC20 tokenContract = IERC20(token);
 
     daiContract.permit(holder, spender, nonce, expiry, allowed, v, r, s);
-    updateBalances(holder, amount);
+    updateBalances(holder, amount - fee);
     tokenContract.transferFrom(holder, address(this), amount);
 
   }

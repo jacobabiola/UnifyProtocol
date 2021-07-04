@@ -93,12 +93,12 @@ function App() {
     // check the network
     if (window.ethereum.networkVersion === GOERLI_NETWORK_ID) {   
       console.log( "Connected to Goerli ", window.ethereum.networkVersion )
-      setNetworkName("Goerli")
+      setNetworkName("Ethereum")
       setNetworkError(false)
       return true;
     } else if (window.ethereum.networkVersion === MUMBAI_NETWORK_ID) {
       console.log( "Connected to Mumbai ", window.ethereum.networkVersion )
-      setNetworkName("Mumbai")
+      setNetworkName("Polygon")
       setNetworkError(false)
       return true;
     } 
