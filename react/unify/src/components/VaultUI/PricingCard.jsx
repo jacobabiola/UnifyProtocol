@@ -43,7 +43,7 @@ const ApyDisplay = (props) => {
     <Flex w="100%" align="center" justify="center" my="5" fontWeight="extrabold">
 
       <Text fontSize="72px" lineHeight="1" letterSpacing="tight">
-        {price + "%"}
+        {price}
       </Text>
     </Flex>
   )
@@ -85,7 +85,7 @@ export const PricingCard = (props) => {
   const { onClick, features, name, description, price, popular, ...rest } = props
   return (
     <PricingWrapper highlight={popular} {...rest}>
-      {popular && <PopularBadge>Now Active</PopularBadge>}
+      {popular && <PopularBadge>Cheapest</PopularBadge>}
 
       <Flex direction="column" justify="center">
         <Text align="center" fontSize="2xl" fontWeight="bold">
@@ -103,7 +103,7 @@ export const PricingCard = (props) => {
           color={mode('blue.500', 'blue.300')}
           fontWeight="semibold"
         >
-          APY
+          Ticket Price
         </Box>
       </Flex>
 
@@ -114,11 +114,13 @@ export const PricingCard = (props) => {
       </List>
 
       <VaultModal
+        name={props.name}
         disabled={!popular}
         token = { props.token }
         ethvault={props.ethvault}
         address={props.address}
         provider={props.provider}
+        opposite={props.opposite}
       />
     </PricingWrapper>
   )

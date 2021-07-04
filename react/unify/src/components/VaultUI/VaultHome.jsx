@@ -1,5 +1,6 @@
 import { Box, Heading, SimpleGrid, Text, useColorModeValue as mode } from '@chakra-ui/react'
 import * as React from 'react'
+import { GOERLI_NETWORK_ID } from '../../App'
 import { PricingCard } from './PricingCard'
 
 export const VaultHome = (props) => {
@@ -11,6 +12,7 @@ export const VaultHome = (props) => {
   //   image: "https://s2.coinmarketcap.com/static/img/coins/64x64/4943.png",
   //   decimals: 18
   // }
+
   var goerliToken = {
     address: "0x76a245568c71C221a2Ce4a300359333ddd2ECa2c",
     polygonAddress: "0x9848Cb1dB7259aeC5f096d4562f6FF2bfF1d5C0a",
@@ -18,7 +20,8 @@ export const VaultHome = (props) => {
     image: "https://s2.coinmarketcap.com/static/img/coins/64x64/4943.png",
     decimals: 18
   }
-  
+
+  let oppositeNetwork = window.ethereum.networkVersion === GOERLI_NETWORK_ID ? "Polygon" : "Ethereum"
 
   return (
     <Box as="section" bg={mode('gray.50', 'gray.800')} py="20">
@@ -41,7 +44,7 @@ export const VaultHome = (props) => {
             sm: 'center',
           }}
         >
-          Unify Vaults on {props.networkname}
+          Unify Bridge on {props.networkname}
         </Heading>
         <Text
           mt="4"
@@ -53,7 +56,7 @@ export const VaultHome = (props) => {
             sm: 'center',
           }}
         >
-          Unify is a cross chain protocol offering you the best interest across Ethereum, Polygon and Binance Smart Chain.  
+          The cheapest way to move tokens between Ethereum and Polygon.  
         </Text>
 
         <SimpleGrid
@@ -72,50 +75,54 @@ export const VaultHome = (props) => {
           }}
         >
           <PricingCard
-            name="WETH"
-            description="Earn interest on your Wrapped Ethereum token and save money on transaction fees"
-            price={4}
+            name="Jet"
+            description="Put your tokens on the private jet and arrive instantly at your destination"
+            price={"0.3%"}
             features={[
-              'Single transaction deposit',
-              'Always have the best rate for your crypto',
-              'Deposit on Ethereum earn cross chain',
+              'Premium Service',
+              `Arrive On ${oppositeNetwork} Network Instantly`,
+              'Powered By Biconomi',
             ]}
             token={goerliToken}
             ethvault={props.ethvault}
             address={props.address}
             provider={props.provider}
+            opposite={oppositeNetwork}
           />
           <PricingCard
             popular
-            name="DAI"
-            description="Earn interest on your DAI tokens and save money on transaction fees"
-            price={12}
+            name="Bus"
+            description="Put your tokens on the bus and share fees with your fellow passengers"
+            price={"$3"}
             features={[
-              'Single transaction deposit',
-              'Always have the best rate for your crypto',
-              'Deposit on Ethereum earn cross chain',
-              'Withdraw anytime',
-
+              'Pooling Service',
+              `Cheapest Way To Move Your Tokens`,
+              'No Transaction Fees',
+              `Arrive On ${oppositeNetwork} In 24hrs`,
             ]}
             token={goerliToken}
             ethvault={props.ethvault}
             address={props.address}
             provider={props.provider}
+            opposite={oppositeNetwork}
 
           />
+
           <PricingCard
-            name="WBTC"
-            description="Earn interest on your Wrapped Bitcoin tokens and save money on transaction fees"
-            price={3}
+            name="Taxi"
+            description="Put your tokens in a taxi and get to your destination sooner by riding solo"
+            price={"$10"}
             features={[
-              'Single transaction deposit',
-              'Always have the best rate for your crypto',
-              'Deposit on Ethereum earn cross chain',
+              'Private Service',
+              `Arrive On ${oppositeNetwork} In 10 Minutes`,
+              'Powered By Polygon Bridge'
+              
             ]}
             token={goerliToken}
             ethvault={props.ethvault}
             address={props.address}
             provider={props.provider}
+            opposite={oppositeNetwork}
 
           />
         </SimpleGrid>

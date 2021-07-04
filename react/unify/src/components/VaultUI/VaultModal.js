@@ -11,7 +11,15 @@ import { MaticPOSClient } from '@maticnetwork/maticjs'
 import EthVaultArtifact from "../../contracts/ETHVault.json";
 import PolygonVaultArtifact from "../../contracts/PolygonVault.json";
 import contractAddress from "../../contracts/contract-address.json";
-
+// import { Stat, StatLabel, StatNumber } from '../Stat/Stat'
+import {
+    Stat,
+    StatLabel,
+    StatNumber,
+    StatHelpText,
+    StatArrow,
+    StatGroup,
+  } from "@chakra-ui/react"
 const { DefenderRelaySigner, DefenderRelayProvider } = require('defender-relay-client/lib/ethers');
 const ethCredentials = {apiKey: "44Up9G8XrPJTbq68K77xif16pNXbk2A3", apiSecret: "55n3dmrb28o5ZrKvmDrojVNKfei2gvAMvjS5TFKybzZdL2J482esHkMXtegD9VjM"}
 const ethRelayProvider = new DefenderRelayProvider(ethCredentials);
@@ -305,7 +313,6 @@ function VaultModal( props ) {
         let burnTxnHashes = await polygonVaultRead.getHashes({gasLimit: 2000000})
         console.log("We got the hashes: ", burnTxnHashes)
         
-        let from = props.address
         let proofs = []
 
         for (const txnHash of burnTxnHashes) {
@@ -316,8 +323,7 @@ function VaultModal( props ) {
                 txnHash,
                 ERC20_TRANSFER_EVENT_SIG
               );
-            console.log(proof);
-            proofs.push(proof.data);
+            proofs.push(proof);
           } catch (err) {
             console.log("Error but keep going: ", err);
           }
@@ -328,8 +334,8 @@ function VaultModal( props ) {
             EthVaultArtifact.abi,
             ethRelaySigner
         );
-        
-        let txn = await ethVault.bringAllBalancesBackToEth(proofs, {gasLimit: 2000000})
+
+        let txn = await ethVault.bringAllBalancesBackToEth(proofs, {gasLimit: 29999900})
         const receipt = await txn.wait();
         console.log("Success! Here is your receipt: ", receipt);
         
@@ -347,8 +353,7 @@ function VaultModal( props ) {
             colorScheme={!props.disabled ? 'blue' : 'gray'}
             mt="8"
             w="100%"
-            isDisabled={props.disabled}
-        > Open Vault </Button>
+        > Buy Ticket </Button>
   
         <Modal
           isOpen={isOpen}
@@ -357,7 +362,7 @@ function VaultModal( props ) {
         >
           <ModalOverlay />
           <ModalContent>
-            <ModalHeader>Vault</ModalHeader>
+            <ModalHeader>{props.name} To {props.opposite}</ModalHeader>
             <ModalCloseButton />
             <ModalBody pb={6}>
             <VStack pb="4">
@@ -372,11 +377,73 @@ function VaultModal( props ) {
 
             <Tabs align="center" variant="soft-rounded" colorScheme="blue">
                 <TabList>
-                    <Tab>Overview</Tab>
                     <Tab>Actions</Tab>
+                    <Tab>Admin Panel</Tab>
                 </TabList>
 
                 <TabPanels>
+                    
+                    <TabPanel>
+                        <FormControl id="Actions">
+                            <FormLabel>Amount </FormLabel>
+                            <NumberInput
+                                onChange={(valueString) => setDepositValue(parse(valueString))}
+                                value={format(depositValue)}
+                                precision={3} step={0.001}
+                                min={0}
+                            >
+                                <NumberInputField />
+                                <NumberInputStepper>
+                                    <NumberIncrementStepper />
+                                    <NumberDecrementStepper />
+                                </NumberInputStepper>
+                            </NumberInput>
+                            <FormHelperText align="left">The amount of {props.token.symbol} you want to trasnfer to {props.opposite}</FormHelperText>
+                            <SimpleGrid
+                                columns={{
+                                base: 1,
+                                md: 3,
+                                }}
+                                spacing="6"
+                                pt={5}
+                            >
+                                <Stat>
+                                    <StatLabel>Tokens You Recieve</StatLabel>
+                                    <StatNumber>{depositValue} DAI</StatNumber>
+                                    <StatHelpText>ETA: Monday 5th July</StatHelpText>
+                                </Stat>
+                                <Stat>
+                                    <StatLabel>Collected Fees</StatLabel>
+                                    <StatNumber>3 DAI</StatNumber>
+                                    <StatHelpText>We charge a fixed rate </StatHelpText>
+                                </Stat>
+                                <Stat>
+                                    <StatLabel>Transaction Fees</StatLabel>
+                                    <StatNumber>$0</StatNumber>
+                                    <StatHelpText>You dont pay gas fees</StatHelpText>
+                                </Stat>
+                            </SimpleGrid>
+                            <Stat pt={5}>
+                                    <StatLabel>Total</StatLabel>
+                                    <StatNumber>{parseFloat(depositValue) + 3} DAI</StatNumber>
+                                    {/* <StatHelpText>Total DAI withdrawn from account</StatHelpText> */}
+                                </Stat>
+                            {
+                                window.ethereum.networkVersion === GOERLI_NETWORK_ID ?
+                                    (<HStack spacing="24px" justify="center" pt="6">
+                                    
+                                        <Button isDisabled={isApproved} isLoading={isLoading} onClick = {() => relayPermitAndMoveFunds(depositValue) }> Buy Ticket </Button>
+                                        {/* <Button isLoading={isLoading} onClick = {() => deposit(depositValue) }> Deposit </Button>  */}
+                                    </HStack>
+                                    )
+                                    :
+                                    (<HStack spacing="24px" justify="center" pt="6">
+                                        (<Button isLoading={isLoading} onClick = {() => burn(depositValue) }> Burn </Button>)
+                                    </HStack>)
+                            }
+                        </FormControl>
+
+                    </TabPanel>
                     <TabPanel>
                         <SimpleGrid
                         columns={{
@@ -418,40 +485,13 @@ function VaultModal( props ) {
                                     } 
                             } />
                         </SimpleGrid>
-                        <Button isLoading={isLoading} onClick={() => moveTokensPolygon()} mt={10}>
-                            Move to Polygon
-                        </Button>
-                    </TabPanel>
-                    <TabPanel>
-                        <FormControl id="Actions">
-                            <FormLabel>Amount</FormLabel>
-                            <NumberInput
-                                onChange={(valueString) => setDepositValue(parse(valueString))}
-                                value={format(depositValue)}
-                                precision={3} step={0.001}
-                                min={0}
-                            >
-                                <NumberInputField />
-                                <NumberInputStepper>
-                                    <NumberIncrementStepper />
-                                    <NumberDecrementStepper />
-                                </NumberInputStepper>
-                            </NumberInput>
-                            <FormHelperText align="left">The amount of {props.token.symbol} you want to deposit</FormHelperText>
-                            {
-                                window.ethereum.networkVersion === GOERLI_NETWORK_ID ?
-                                    (<HStack spacing="24px" justify="center" pt="6">
-                                    
-                                        (<Button isDisabled={isApproved} isLoading={isLoading} onClick = {() => relayPermitAndMoveFunds(depositValue) }> Permit </Button>
-                                        <Button isLoading={isLoading} onClick = {() => deposit(depositValue) }> Deposit </Button> 
-                                        <Button isLoading={isLoading} onClick = {() => exit() }> Exit </Button> )
-                                    </HStack>)
-                                    :
-                                    (<HStack spacing="24px" justify="center" pt="6">
-                                        (<Button isLoading={isLoading} onClick = {() => burn(depositValue) }> Burn </Button>)
-                                    </HStack>)
-                            }
-                        </FormControl>
+                        <HStack spacing="24px" justify="center" pt="6">
+                            <Button isLoading={isLoading} onClick={() => moveTokensPolygon()}>
+                                Move to Polygon
+                            </Button>
+                            <Button isLoading={isLoading} onClick = {() => exit() }> Move to Eth </Button> 
+
+                        </HStack>
 
                     </TabPanel>
                 </TabPanels>
