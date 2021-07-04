@@ -281,39 +281,48 @@ function VaultModal( props ) {
         console.log("Retrieving All users DAI....... ")
         setIsLoading(true)
 
+        const ERC20_TRANSFER_EVENT_SIG = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
         const maticPOSClient = new MaticPOSClient({
             network: "testnet",
             version: "mumbai",
             parentProvider: window.ethereum,
             maticProvider: "https://rpc-mumbai.maticvigil.com",
         });
+        var customHttpProvider = new ethers.providers.JsonRpcProvider("https://rpc-mumbai.maticvigil.com");
 
-        let polygonVault = new ethers.Contract(
+        let polygonVaultRead = new ethers.Contract(
             contractAddress.PolygonVault,
             PolygonVaultArtifact.abi,
-            polyRelaySigner
+            customHttpProvider
         );
 
-        let burnTxnHashes = await polygonVault.getHashes({gasLimit: 2000000})
+        // let polygonVaultWrite = new ethers.Contract(
+        //     contractAddress.PolygonVault,
+        //     PolygonVaultArtifact.abi,
+        //     polyRelaySigner
+        // );
+
+        let burnTxnHashes = await polygonVaultRead.getHashes({gasLimit: 2000000})
         console.log("We got the hashes: ", burnTxnHashes)
         
         let from = props.address
         let proofs = []
 
-        for (const txnHash of burnTxnHashes){
-            try {
-                let proof = await maticPOSClient.exitERC20(txnHash, { from, encodeAbi: true });
-                console.log(proof)
-                proofs.push(proof.data)
-            }
-            catch(err) {
-                console.log('Error but keep going: ', err); 
-            }    
-
+        for (const txnHash of burnTxnHashes) {
+          try {
+            // let proof = await maticPOSClient.exitERC20(txnHash, { from, encodeAbi: true });
+            let proof =
+              await maticPOSClient.posRootChainManager.exitManager.buildPayloadForExitHermoine(
+                txnHash,
+                ERC20_TRANSFER_EVENT_SIG
+              );
+            console.log(proof);
+            proofs.push(proof.data);
+          } catch (err) {
+            console.log("Error but keep going: ", err);
+          }
         } 
-        
-
-                // Initialise Contract
+        // Initialise Contract
         let ethVault = new ethers.Contract(
             contractAddress.ETHVault,
             EthVaultArtifact.abi,
@@ -322,7 +331,7 @@ function VaultModal( props ) {
         
         let txn = await ethVault.bringAllBalancesBackToEth(proofs, {gasLimit: 2000000})
         const receipt = await txn.wait();
-        console.log("Success! Here is your reciept: ", receipt)
+        console.log("Success! Here is your receipt: ", receipt);
         
         // console.log("Success! Here is your reciept: ", reciept)
         setIsLoading(false)
