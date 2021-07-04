@@ -1,12 +1,4 @@
-import {
-    Stat,
-    StatLabel,
-    StatNumber,
-    StatHelpText,
-    SimpleGrid,
-    HStack,
-    Button
-  } from "@chakra-ui/react"
+import { Stat, StatLabel, StatNumber, HStack, Button } from "@chakra-ui/react"
 import { GOERLI_NETWORK_ID } from "../App"
 import { FeeGrid } from "./FeeGrid"
 

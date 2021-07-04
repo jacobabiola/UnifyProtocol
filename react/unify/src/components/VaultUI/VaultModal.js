@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ethers, BigNumber } from "ethers";
-import { SimpleGrid, Text, Image, VStack, HStack, Button, FormControl, FormLabel, FormHelperText, useDisclosure, cookieStorageManager } from '@chakra-ui/react'
+import { SimpleGrid, Text, Image, VStack, HStack, Button, FormControl, FormLabel, FormHelperText, useDisclosure } from '@chakra-ui/react'
 import { Tabs, TabList, TabPanels, Tab, TabPanel } from "@chakra-ui/react"
 import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalCloseButton } from "@chakra-ui/react"
 import { NumberInput, NumberInputField, NumberInputStepper, NumberIncrementStepper, NumberDecrementStepper  } from "@chakra-ui/react"
@@ -8,20 +8,12 @@ import { StatCard } from "../Stat"
 import { signDaiPermit } from 'eth-permit';
 import { GOERLI_NETWORK_ID, MUMBAI_NETWORK_ID } from '../../App';
 import { MaticPOSClient } from '@maticnetwork/maticjs'
-import EthVaultArtifact from "../../contracts/ETHVault.json";
 import PolygonVaultArtifact from "../../contracts/PolygonVault.json";
 import contractAddress from "../../contracts/contract-address.json";
-// import { Stat, StatLabel, StatNumber } from '../Stat/Stat'
 
 import { Bus } from '../Bus';
-const { DefenderRelaySigner, DefenderRelayProvider } = require('defender-relay-client/lib/ethers');
-const ethCredentials = {apiKey: "44Up9G8XrPJTbq68K77xif16pNXbk2A3", apiSecret: "55n3dmrb28o5ZrKvmDrojVNKfei2gvAMvjS5TFKybzZdL2J482esHkMXtegD9VjM"}
-const ethRelayProvider = new DefenderRelayProvider(ethCredentials);
-const ethRelaySigner = new DefenderRelaySigner(ethCredentials, ethRelayProvider, { speed: 'fast' });
+const axios = require('axios');
 
-const polyCredentials = {apiKey: "2CHTi6r4c1qiKxmUBz7CNT9da9jiRxnf", apiSecret: "63wJ5TDZHLYUotHZkwg9T5KjgDE8cLxsZ5SEDQgkR5Nqqg4MHx9Qbs1NySqGdXkT"}
-const polyRelayProvider = new DefenderRelayProvider(polyCredentials);
-const polyRelaySigner = new DefenderRelaySigner(polyCredentials, polyRelayProvider, { speed: 'fast' });
 
 const erc20ABI = require('../../contracts/ERC20ABI.json')
 
@@ -30,7 +22,6 @@ function VaultModal( props ) {
     const FEE_WE_CHARGE_USER = 3
     
     const [isLoading, setIsLoading] = useState(false) 
-    const [isApproved, setIsApproved] = useState(false)
     const { isOpen, onOpen, onClose } = useDisclosure()
     
     const format = (val) => `$` + val
@@ -39,7 +30,6 @@ function VaultModal( props ) {
     const [depositValue, setDepositValue] = React.useState("0.00")
     const [daiContractBalance, setDaiContractBalance] = useState(0)
     const [yourShares, setYourShares] = useState(0)
-    const [permission, setPermission] = useState(undefined)
 
     var permitDetails = {
         tokenAddress: props.token.address,
@@ -90,30 +80,32 @@ function VaultModal( props ) {
     
      }, [isLoading, isOpen, props.ethvault, props.token.decimals]);
 
-    // async function moveTokenToPolygon() {
-    //     setIsLoading(true)
-    //     console.log("Transfering token to Polygon")
-    //     let addressOnPolygonSide = props.address // For now its just the person who activates the transfer
-    //     let txn = await props.ethvault.moveFundsToPolygon(addressOnPolygonSide, {gasLimit: 2000000})
-    //     const receipt = await txn.wait();
-    //     console.log("Success! Here is your reciept: ", receipt)
-    //     setIsLoading(false)
+    async function testFunc() {
+        // let txn = await ethVault.depositWithPermit(body.finalAmount, body.finalFee, body.senderAddress, body.spender, body.signature.nonce, body.signature.expiry, true, body.signature.v, body.signature.r, body.signature.s, {gasLimit: 2000000})
 
-    // }
+        axios.post('https://api.defender.openzeppelin.com/autotasks/a78e3d07-04e9-47f7-8750-e0b3b32bdaee/runs/webhook/c06b9428-d8e4-4cb7-bbda-a258fae7addd/M4uK2vFS8L3DRPH37FuABF', {
+            contractAddress: contractAddress.ETHVault,
+          })
+          .then(function (response) {
+            console.log(response.data.result);
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+    }
 
     async function moveTokensPolygon() {
         setIsLoading(true)
-        console.log("Transfering tokens to Polygon")
-        // Initialise Contract
-        let ethVault = new ethers.Contract(
-            contractAddress.ETHVault,
-            EthVaultArtifact.abi,
-            ethRelaySigner
-        );
-        let txn = await ethVault.moveAllBalancesToPolygon({gasLimit: 2000000})
-        const receipt = await txn.wait();
-        console.log("Success! Here is your reciept: ", receipt)
-        setIsLoading(false)
+        axios.post('https://api.defender.openzeppelin.com/autotasks/a78e3d07-04e9-47f7-8750-e0b3b32bdaee/runs/webhook/c06b9428-d8e4-4cb7-bbda-a258fae7addd/M4uK2vFS8L3DRPH37FuABF', {
+            contractAddress: contractAddress.ETHVault,
+          })
+          .then(function (response) {
+            console.log(response.data.result);
+            setIsLoading(false)
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
     }
 
     async function relayPermitAndMoveFunds(value) {
@@ -125,92 +117,31 @@ function VaultModal( props ) {
         let finalAmount = BigNumber.from(normalisedAmount)
         let finalFee = ethers.utils.parseUnits(String(FEE_WE_CHARGE_USER), props.token.decimals)
         // Ask you to permit us to transfer funds
-        const result = await signDaiPermit(window.ethereum, permitDetails.tokenAddress, permitDetails.senderAddress, permitDetails.spender);
+        const signature = await signDaiPermit(window.ethereum, permitDetails.tokenAddress, permitDetails.senderAddress, permitDetails.spender);
         console.log("Signature is: ")
-        console.log(result)
+        console.log(signature)
 
-        // Initialise Contract
-        let ethVault = new ethers.Contract(
-            contractAddress.ETHVault,
-            EthVaultArtifact.abi,
-            ethRelaySigner
-        );
+        axios.post('https://api.defender.openzeppelin.com/autotasks/77946913-64f0-4493-b7bb-6a3e6ee51bca/runs/webhook/c06b9428-d8e4-4cb7-bbda-a258fae7addd/6sKddT4fa6ipoNZiCygzQh', {
+            contractAddress: contractAddress.ETHVault,
+            finalAmount: finalAmount.toString(),
+            finalFee: finalFee.toString(),
+            senderAddress: permitDetails.senderAddress,
+            spender: permitDetails.spender,
+            signature: signature
+          })
+          .then(function (response) {
+            let hash = response.data.result
+            console.log("Sucess! Here is the txnHash: ", hash);
+            if (hash) {
+                setIsLoading(false)
+            }
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
 
-        let txn = await ethVault.depositWithPermit(finalAmount, finalFee, permitDetails.senderAddress, permitDetails.spender, result.nonce, result.expiry, true, result.v, result.r, result.s, {gasLimit: 2000000})
-
-
-        const receipt = await txn.wait();
-        console.log("Success! Here is your reciept: ", receipt)
-
-        setIsLoading(false)
 
     }
-
-    async function permit() {
-        setIsLoading(true)
-        // GENERATE SIGNATURE
-        console.log("Getting signature....")
-        console.log(window.ethereum, permitDetails.tokenAddress, permitDetails.senderAddress, permitDetails.spender);
-
-        const result = await signDaiPermit(window.ethereum, permitDetails.tokenAddress, permitDetails.senderAddress, permitDetails.spender);
-        console.log(result)
-
-        let abi = [
-            "function permit(address holder, address spender, uint256 nonce, uint256 expiry, bool allowed, uint8 v, bytes32 r, bytes32 s)"
-        ];
-
-        let DAI = new ethers.Contract(
-            props.token.address,
-            abi,
-            // props.provider.getSigner()
-            ethRelaySigner
-        );
-
-        console.log(permitDetails.senderAddress, permitDetails.spender, result.nonce, result.expiry, true, result.v, result.r, result.s)
-        
-        // PERMIT ON CHAIN
-        let txn = await DAI.permit(permitDetails.senderAddress, permitDetails.spender, result.nonce, result.expiry, true, result.v, result.r, result.s, {gasLimit: 2000000})
-
-
-        const receipt = await txn.wait();
-        console.log("Success! Here is your reciept: ", receipt)
-        setIsLoading(false)
-        setIsApproved(true)
-        setPermission(result)
-    }
-
-    // async function depositWithPermit(value) {
-    //     console.log("Depositing ...")
-
-    //     setIsLoading(true)
-    //     const normalisedAmount = ethers.utils.parseUnits(value, props.token.decimals)
-    //     let finalAmount = BigNumber.from(normalisedAmount)
-    //     console.log(finalAmount, props.address, contractAddress.ETHVault, permission.nonce, permission.expiry, true, permission.v, permission.r, permission.s)
-    //     let txn = await 
-    //     props.ethvault.depositWithPermit(finalAmount, permitDetails.senderAddress, permitDetails.spender, permission.nonce, permission.expiry, true, permission.v, permission.r, permission.s)
-    //     const receipt = await txn.wait();
-    //     console.log("Success! Here is your reciept: ", receipt)
-    //     setIsLoading(false)
-    //     setIsApproved(false)
-    //     console.log("Done")
-    // }
-
-    async function deposit(value) {
-        console.log("Depositing ...")
-
-        setIsLoading(true)
-        const normalisedAmount = ethers.utils.parseUnits(value, props.token.decimals)
-        let finalAmount = BigNumber.from(normalisedAmount)
-
-        let txn = await props.ethvault.deposit(finalAmount)
-        const receipt = await txn.wait();
-        console.log("Success! Here is your reciept: ", receipt)
-        setIsLoading(false)
-        setIsApproved(false)
-        console.log("Done")
-
-    
-      }
     
       async function polyApprove(value) {
         console.log("Approving ...")
@@ -232,11 +163,6 @@ function VaultModal( props ) {
         setIsLoading(false)
         console.log("Approved")
       }
-    
-    async function withdraw(address, value) {
-
-
-    }
 
 
     async function burn(value) {
@@ -262,43 +188,26 @@ function VaultModal( props ) {
         console.log("Successfully burnt tokens! Here is your reciept: ", reciept)
         let burnTxnHash = reciept.transactionHash
 
-        // NOW WE ARE GOING TO ADD THE BURN TRANSACTION TO THE POLGON CONTRACT USING POLYGON RELAY
-        let polygonVault = new ethers.Contract(
-            contractAddress.PolygonVault,
-            PolygonVaultArtifact.abi,
-            polyRelaySigner
-        );
-
         let finalFee = ethers.utils.parseUnits(String(FEE_WE_CHARGE_USER), props.token.decimals)
-        let txn = await polygonVault.addHash(burnTxnHash, finalFee, props.address, {gasLimit: 2000000})
-        const receipt = await txn.wait();
-        console.log("Successfully added TxnHash and Fee! Here is your reciept: ", receipt)
 
-        setIsLoading(false)
+        axios.post('https://api.defender.openzeppelin.com/autotasks/fd6c0a6b-06eb-45ec-9508-269b9ece91f9/runs/webhook/c06b9428-d8e4-4cb7-bbda-a258fae7addd/Tb12zBH6eeq6kvyTTWKuWQ', {
+            contractAddress: contractAddress.PolygonVault,
+            finalFee: finalFee.toString(),
+            senderAddress: permitDetails.senderAddress,
+            burnTxnHash: burnTxnHash
+          })
+          .then(function (response) {
+            let hash = response.data.result
+            console.log("Sucess! Here is the txnHash: ", hash);
+            if (hash) {
+                setIsLoading(false)
+            }
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+
     }
-
-    // async function exit() {
-    //     console.log("Retrieving DAI....... ")
-    //     setIsLoading(true)
-    //     let from = props.address 
-
-    //     const maticPOSClient = new MaticPOSClient({
-    //         network: "testnet",
-    //         version: "mumbai",
-    //         parentProvider: window.ethereum,
-    //         maticProvider: "https://rpc-mumbai.maticvigil.com",
-    //     });
-
-    //     let burnTxHash = "0x52dad223da5789a045f6121af503119c7170f688ba55ad4116f9ce71005e0526"
-
-
-    //     let reciept = await maticPOSClient.exitERC20(burnTxHash, { from });
-        
-        
-    //     console.log("Success! Here is your reciept: ", reciept)
-    //     setIsLoading(false)
-
-    // }
 
     async function exit() {
         console.log("Retrieving All users DAI....... ")
@@ -319,12 +228,6 @@ function VaultModal( props ) {
             customHttpProvider
         );
 
-        // let polygonVaultWrite = new ethers.Contract(
-        //     contractAddress.PolygonVault,
-        //     PolygonVaultArtifact.abi,
-        //     polyRelaySigner
-        // );
-
         let burnTxnHashes = await polygonVaultRead.getHashes({gasLimit: 2000000})
         console.log("We got the hashes: ", burnTxnHashes)
         
@@ -332,7 +235,7 @@ function VaultModal( props ) {
 
         for (const txnHash of burnTxnHashes) {
           try {
-            // let proof = await maticPOSClient.exitERC20(txnHash, { from, encodeAbi: true });
+
             let proof =
               await maticPOSClient.posRootChainManager.exitManager.buildPayloadForExitHermoine(
                 txnHash,
@@ -343,19 +246,21 @@ function VaultModal( props ) {
             console.log("Error but keep going: ", err);
           }
         } 
-        // Initialise Contract
-        let ethVault = new ethers.Contract(
-            contractAddress.ETHVault,
-            EthVaultArtifact.abi,
-            ethRelaySigner
-        );
 
-        let txn = await ethVault.bringAllBalancesBackToEth(proofs, {gasLimit: 29999900})
-        const receipt = await txn.wait();
-        console.log("Success! Here is your receipt: ", receipt);
-        
-        // console.log("Success! Here is your reciept: ", reciept)
-        setIsLoading(false)
+        axios.post('https://api.defender.openzeppelin.com/autotasks/30308712-cf9e-48e7-b3a3-e9d6d54fa610/runs/webhook/c06b9428-d8e4-4cb7-bbda-a258fae7addd/DtqSi5yiKXCpFqoJjFM9Zh', {
+            contractAddress: contractAddress.ETHVault,
+            proofs: proofs
+          })
+          .then(function (response) {
+            let hash = response.data.result
+            console.log("Sucess! Here is the txnHash: ", hash);
+            if (hash) {
+                setIsLoading(false)
+            }
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
 
     }
 
@@ -427,7 +332,7 @@ function VaultModal( props ) {
                                 :
                                 (
                                     props.name === "Jet" ?
-                                    
+
                                         (<div>Danilo Put stuff here</div>)
                                         :
                                         (<div> Taxi stuff goes here </div>)
@@ -483,6 +388,7 @@ function VaultModal( props ) {
                                 Move to Polygon
                             </Button>
                             <Button isLoading={isLoading} onClick = {() => exit() }> Move to Eth </Button> 
+                            <Button onClick = {() => testFunc()}> Test</Button>
 
                         </HStack>
 
