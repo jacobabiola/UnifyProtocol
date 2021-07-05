@@ -414,12 +414,15 @@ function VaultModal(props) {
                       />
                     ) : props.name === "Jet" ? (
                       <Jet
+                        provider={props.provider}
                         value={depositValue}
                         loading={isLoading}
-                        burn={burn}
-                        moveFunds={relayPermitAndMoveFunds}
-                        fee={FEE_WE_CHARGE_USER}
-                        polyapprove={polyApprove}
+                        useraddress={props.address}
+                        networktoken={props.networktokens[props.tokenname]}
+                        setIsLoading={setIsLoading}
+                        // polyToEthereum={}
+                        // goEthereumToPoly={() => {}}
+                        fee={0}
                       />
                     ) : (
                       <div> Taxi stuff goes here </div>

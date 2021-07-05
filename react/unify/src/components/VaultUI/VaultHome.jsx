@@ -84,6 +84,7 @@ export const VaultHome = (props) => {
               'Powered By Biconomy',
             ]}
             token={goerliToken}
+            networktokens={props.networktokens}
             ethvault={props.ethvault}
             address={props.address}
             provider={props.provider}
