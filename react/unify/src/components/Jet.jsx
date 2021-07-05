@@ -184,7 +184,7 @@ export const Jet = (props) => {
               Number(props.value) -
               Number(props.value) * 0.003
             ).toFixed(2)}
-            eta={"ETA: 3 minutes"}
+            eta={"ETA: 1 minute"}
             collectedfees={`0.3 %`}
             collectedtext={"Biconomy fee"}
             txnfees={"Ξ 0.005"}
@@ -223,7 +223,7 @@ export const Jet = (props) => {
             eta={"ETA: 3 minutes"}
             collectedfees={`0.3 %`}
             collectedtext={"Biconomy fee"}
-            txnfees={"$0.01"}
+            txnfees={"0.005"}
             txntext={"MATIC for approve+deposit"}
           />
           <Stat pt={5}>
