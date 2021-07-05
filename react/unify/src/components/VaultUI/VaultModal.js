@@ -239,7 +239,7 @@ function VaultModal(props) {
       maticProvider: window.ethereum,
     });
 
-    let from = props.address; // THE USER HAS TO BURN THEIR TOKEN TO RECIEVE IT ON THE OTHER SIDE
+    let from = props.address; // THE USER HAS TO BURN THEIR TOKEN TO RECEIVE IT ON THE OTHER SIDE
     console.log(props.token.polygonAddress, finalAmount, from);
 
     let reciept = await maticPOSClient.burnERC20(

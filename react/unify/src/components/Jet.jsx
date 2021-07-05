@@ -180,7 +180,7 @@ export const Jet = (props) => {
       {window.ethereum.networkVersion === GOERLI_NETWORK_ID ? (
         <div>
           <FeeGrid
-            tokensRecieved={(
+            tokensReceived={(
               Number(props.value) -
               Number(props.value) * 0.003
             ).toFixed(2)}
@@ -216,7 +216,7 @@ export const Jet = (props) => {
       ) : (
         <div>
           <FeeGrid
-            tokensRecieved={(
+            tokensReceived={(
               Number(props.value) -
               Number(props.value) * 0.003
             ).toFixed(2)}

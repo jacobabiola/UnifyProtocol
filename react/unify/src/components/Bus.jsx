@@ -12,7 +12,7 @@ export const Bus = (props) => {
                     (                        
                     <div>
                         <FeeGrid
-                            tokensRecieved={parseFloat(props.value)}
+                            tokensReceived={parseFloat(props.value)}
                             eta={"ETA: Monday 5th July"}
                             collectedfees={`${props.fee} DAI`}
                             collectedtext={"We charge a fixed rate"}
@@ -35,7 +35,7 @@ export const Bus = (props) => {
                     <div>
 
                     <FeeGrid
-                            tokensRecieved={parseFloat(props.value)}
+                            tokensReceived={parseFloat(props.value)}
                             eta={"ETA: Monday 5th July"}
                             collectedfees={`${props.fee} DAI`}
                             collectedtext={"We charge a fixed rate"}
