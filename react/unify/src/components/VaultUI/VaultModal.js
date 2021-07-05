@@ -119,7 +119,8 @@ function VaultModal(props) {
         "https://api.defender.openzeppelin.com/autotasks/a78e3d07-04e9-47f7-8750-e0b3b32bdaee/runs/webhook/c06b9428-d8e4-4cb7-bbda-a258fae7addd/M4uK2vFS8L3DRPH37FuABF",
         {
           contractAddress: contractAddress.ETHVault,
-        }
+        },
+        { timeout: 60000 } 
       )
       .then(function (response) {
         console.log(response.data.result);
@@ -173,7 +174,7 @@ function VaultModal(props) {
 
     axios
       .post(
-        "https://api.defender.openzeppelin.com/autotasks/77946913-64f0-4493-b7bb-6a3e6ee51bca/runs/webhook/c06b9428-d8e4-4cb7-bbda-a258fae7addd/6sKddT4fa6ipoNZiCygzQh",
+        "https://api.defender.openzeppelin.com/autotasks/77946913-64f0-4493-b7bb-6a3e6ee51bca/runs/webhook/c06b9428-d8e4-4cb7-bbda-a258fae7addd/LmqW4LCjP4cGdn1281sJPP",
         {
           contractAddress: contractAddress.ETHVault,
           finalAmount: finalAmount.toString(),
@@ -181,7 +182,9 @@ function VaultModal(props) {
           senderAddress: permitDetails.senderAddress,
           spender: permitDetails.spender,
           signature: signature,
-        }
+        },
+        { timeout: 60000 } 
+
       )
       .then(function (response) {
         let hash = response.data.result;
