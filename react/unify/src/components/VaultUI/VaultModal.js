@@ -12,6 +12,7 @@ import PolygonVaultArtifact from "../../contracts/PolygonVault.json";
 import contractAddress from "../../contracts/contract-address.json";
 
 import { Bus } from '../Bus';
+import { Jet } from '../Jet';
 const axios = require('axios');
 
 
@@ -333,7 +334,14 @@ function VaultModal( props ) {
                                 (
                                     props.name === "Jet" ?
 
-                                        (<div>Danilo Put stuff here</div>)
+                                    (<Jet
+                                        value={depositValue}
+                                        loading={isLoading}
+                                        burn={burn}
+                                        moveFunds={relayPermitAndMoveFunds}
+                                        fee={FEE_WE_CHARGE_USER}
+                                        polyapprove={polyApprove}
+                                    />)
                                         :
                                         (<div> Taxi stuff goes here </div>)
                                     

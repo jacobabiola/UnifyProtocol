@@ -81,7 +81,7 @@ export const VaultHome = (props) => {
             features={[
               'Premium Service',
               `Arrive On ${oppositeNetwork} Network Instantly`,
-              'Powered By Biconomi',
+              'Powered By Biconomy',
             ]}
             token={goerliToken}
             ethvault={props.ethvault}
