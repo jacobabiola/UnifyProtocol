@@ -11,11 +11,11 @@ export const VaultHome = (props) => {
   //   symbol: "DAI",
   //   image: "https://s2.coinmarketcap.com/static/img/coins/64x64/4943.png",
   //   decimals: 18
-  // }
+  // }0x2686eca13186766760a0347ee8eeb5a88710e11b
 
   var goerliToken = {
-    address: "0x76a245568c71C221a2Ce4a300359333ddd2ECa2c",
-    polygonAddress: "0x9848Cb1dB7259aeC5f096d4562f6FF2bfF1d5C0a",
+    address: "0x2686eca13186766760a0347ee8eeb5a88710e11b",
+    polygonAddress: "0x27a44456bEDb94DbD59D0f0A14fE977c777fC5C3",
     symbol: "DAI",
     image: "https://s2.coinmarketcap.com/static/img/coins/64x64/4943.png",
     decimals: 18

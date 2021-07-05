@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 contract PolygonVault {
 
   string[] userBurnTxnHashes;
-  address token = 0x9848Cb1dB7259aeC5f096d4562f6FF2bfF1d5C0a;
+  address token = 0x27a44456bEDb94DbD59D0f0A14fE977c777fC5C3;
 
   function addHash(string memory txnHash, uint256 fee, address holder) public {
     userBurnTxnHashes.push(txnHash);

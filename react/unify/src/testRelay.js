@@ -21,7 +21,7 @@ exports.handler = async function(credentials) {
   // Initialize defender relayer provider and signer
   const provider = new DefenderRelayProvider(credentials);
   const signer = new DefenderRelaySigner(credentials, provider, { speed: 'fast' });
-  const contractAddress = '0x76a245568c71C221a2Ce4a300359333ddd2ECa2c'; // Goerli DAI contract
+  const contractAddress = '0x2686eca13186766760a0347ee8eeb5a88710e11b'; // Goerli DAI contract
   return exports.main(signer, await signer.getAddress(), contractAddress); // Send funds to self
 }
 

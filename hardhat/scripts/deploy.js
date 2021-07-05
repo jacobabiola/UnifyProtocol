@@ -17,7 +17,7 @@ async function main() {
   // let DAI = "0x6b175474e89094c44da98b954eedeac495271d0f" // DAI Address MAINNET
 
   console.log("---------- DEPLOYING ETH CONTRACTS ------------")
-  let DAI = "0x76a245568c71C221a2Ce4a300359333ddd2ECa2c" // DAI address Goerli
+  let DAI = "0x2686eca13186766760a0347ee8eeb5a88710e11b" // DAI address Goerli
   const ETHVault = await hre.ethers.getContractFactory("ETHVault");
   const ethVault = await ETHVault.deploy("DAI Vault ETH", DAI);
 
