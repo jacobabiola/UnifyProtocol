@@ -10,8 +10,8 @@ export const FeeGrid = (props) => {
     return (
         <SimpleGrid columns={{ base: 1, md: 3, }} spacing="6" pt={5} >
             <Stat>
-                <StatLabel>Tokens You Recieve</StatLabel>
-                <StatNumber>{props.tokensRecieved}</StatNumber>
+                <StatLabel>Tokens You Receive</StatLabel>
+                <StatNumber>{props.tokensReceived}</StatNumber>
                 <StatHelpText>{props.eta}</StatHelpText>
             </Stat>
             <Stat>
