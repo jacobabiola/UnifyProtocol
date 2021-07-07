@@ -149,11 +149,11 @@ function VaultModal(props) {
     // const receipt = await txn.wait();
     // console.log("Sucessfully moved funds! Here is your reciept: ", receipt);
 
-    balance1 = await simpleBridge.balanceFor(props.token.address);
-    console.log("You have ", ethers.utils.formatEther(balance1), " amount of tokens");
+    // balance1 = await simpleBridge.balanceFor(props.token.address);
+    // console.log("You have ", ethers.utils.formatEther(balance1), " amount of tokens");
 
-    balance2 = await simpleBridge.balanceFor("0xb5B640E6414b6DeF4FC9B3C1EeF373925effeCcF");
-    console.log("You have ", ethers.utils.formatEther(balance2), " amount of tokens Test Token");
+    // balance2 = await simpleBridge.balanceFor("0xb5B640E6414b6DeF4FC9B3C1EeF373925effeCcF");
+    // console.log("You have ", ethers.utils.formatEther(balance2), " amount of tokens Test Token");
 
     // let iSimpleBridge = new ethers.utils.Interface(SimpleBridgeArtifact.abi);
 
