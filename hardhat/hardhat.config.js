@@ -44,6 +44,7 @@ module.exports = {
       accounts: {
         mnemonic: mnemonic(),
       },
+      gas: 2000000
     }
   }
 };

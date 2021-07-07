@@ -14,6 +14,7 @@
     "fork": "npx hardhat node --fork https://mainnet.infura.io/v3/23b5846652c3481d8b6fd706dbd23b0e & npx hardhat node --fork https://speedy-nodes-nyc.moralis.io/42aa96da03e06985042bb4bc/polygon/mainnet --port 8555 &",
     "deployEth": "npx hardhat run scripts/deploy.js --network goerli",
     "deployPolygon": "npx hardhat run scripts/deployPolygon.js --network mumbai",
+    "deploySimple": "npx hardhat run scripts/deploySimple.js --network goerli",
     "deploy": "npx hardhat run scripts/deploy.js --network localhost ; npx hardhat run scripts/deployPolygon.js --network localPolygon"
   },
   "dependencies": {

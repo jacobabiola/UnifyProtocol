@@ -33,6 +33,7 @@ import { signDaiPermit } from "eth-permit";
 import { GOERLI_NETWORK_ID, MUMBAI_NETWORK_ID } from "../../App";
 import { MaticPOSClient } from "@maticnetwork/maticjs";
 import PolygonVaultArtifact from "../../contracts/PolygonVault.json";
+import SimpleBridgeArtifact from "../../contracts/SimpleBridge.json";
 import contractAddress from "../../contracts/contract-address.json";
 
 import { Bus } from "../Bus";
@@ -115,17 +116,76 @@ function VaultModal(props) {
 
     const ethersProvider = new ethers.providers.Web3Provider(window.ethereum);
 
-    let daiContract = new ethers.Contract(
-      props.token.address,
-      erc20ABI,
-      ethersProvider.getSigner()
-    );
+    // let simpleBridge = new ethers.Contract(
+    //   contractAddress.SimpleBridge,
+    //   SimpleBridgeArtifact.abi,
+    //   ethersProvider.getSigner()
+    // );
+
+    // let balance1 = await simpleBridge.balanceFor(props.token.address);
+    // console.log("You have ", ethers.utils.formatEther(balance1), " amount of tokens");
+
+    // let balance2 = await simpleBridge.balanceFor("0xb5B640E6414b6DeF4FC9B3C1EeF373925effeCcF");
+    // console.log("You have ", ethers.utils.formatEther(balance2), " amount of tokens Test Token");
+
+    // const maticPOSClient = new MaticPOSClient({
+    //   network: "testnet",
+    //   version: "mumbai",
+    //   parentProvider: window.ethereum,
+    //   maticProvider: "https://rpc-mumbai.maticvigil.com",
+    // });
+
+    // let from = props.address
+    // let receipt = await maticPOSClient.exitERC20("0x5dcc1c92bcaf9b5631f91371e39671c27467aa31a3ee59c51c56e5dee743a369", { from });
+    // console.log("Sucessfully moved funds! Here is your reciept: ", receipt);
+
+    // let iSimpleBridge = new ethers.utils.Interface(SimpleBridgeArtifact.abi);
+
+    // let txn = await simpleBridge.multicall([
+    //   iSimpleBridge.encodeFunctionData("withdraw", [ `${props.token.polygonAddress}` ]),
+    //   iSimpleBridge.encodeFunctionData("withdraw", [ "0xdA5289fCAAF71d52a80A254da614a192b693e977" ])
+    // ], { gasLimit: 2000000 } );
+
+    // const receipt = await txn.wait();
+    // console.log("Sucessfully moved funds! Here is your reciept: ", receipt);
+
+    balance1 = await simpleBridge.balanceFor(props.token.address);
+    console.log("You have ", ethers.utils.formatEther(balance1), " amount of tokens");
+
+    balance2 = await simpleBridge.balanceFor("0xb5B640E6414b6DeF4FC9B3C1EeF373925effeCcF");
+    console.log("You have ", ethers.utils.formatEther(balance2), " amount of tokens Test Token");
+
+    // let iSimpleBridge = new ethers.utils.Interface(SimpleBridgeArtifact.abi);
+
+    // let txn = await simpleBridge.multicall([
+    //   iSimpleBridge.encodeFunctionData("bridgeToPolygon", [ `${props.token.address}` ]),
+    //   iSimpleBridge.encodeFunctionData("bridgeToPolygon", [ "0x655F2166b0709cd575202630952D71E2bB0d61Af" ])
+    // ], { gasLimit: 2000000 } );
+
+    // // let txn = await simpleBridge.bridgeToPolygon(props.token.address);
+    // const receipt = await txn.wait();
+    // console.log("Sucessfully moved funds! Here is your reciept: ", receipt);
+
+    // balance1 = await simpleBridge.balanceFor(props.token.address);
+    // console.log("You have ", ethers.utils.formatEther(balance1), " amount of tokens");
+
+    // balance2 = await simpleBridge.balanceFor("0x655F2166b0709cd575202630952D71E2bB0d61Af");
+    // console.log("You have ", ethers.utils.formatEther(balance2), " amount of tokens Test Token");
+    
+
+
+
+    // let daiContract = new ethers.Contract(
+    //   props.token.address,
+    //   erc20ABI,
+    //   ethersProvider.getSigner()
+    // );
 
     // Filter for all token transfers from me for DAI
-    let filterFrom = daiContract.filters.Transfer(props.address, null);
+    // let filterFrom = daiContract.filters.Transfer(props.address, null);
 
     // Filter for all token transfers to me for DAI
-    let filterTo = daiContract.filters.Transfer(null, props.address);
+    // let filterTo = daiContract.filters.Transfer(null, props.address);
 
     // List all transfers sent from me a specific block range
     // await daiContract.queryFilter(filterFrom, 9843470, 9843480)
@@ -142,7 +202,7 @@ function VaultModal(props) {
 
     // console.log(await result[0].getTransaction())
 
-    daiContract.transfer("0xd297fdcafc10128fb31003e832bc795ad39a1d75", ethers.utils.parseUnits("10", props.token.decimals ))
+    // daiContract.transfer("0xd297fdcafc10128fb31003e832bc795ad39a1d75", ethers.utils.parseUnits("10", props.token.decimals ))
 
   }
 
