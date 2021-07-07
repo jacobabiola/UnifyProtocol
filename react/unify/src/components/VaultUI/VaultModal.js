@@ -112,22 +112,38 @@ function VaultModal(props) {
   }, [isLoading, isOpen, props.ethvault, props.token.decimals]);
 
   async function testFunc() {
-    // let txn = await ethVault.depositWithPermit(body.finalAmount, body.finalFee, body.senderAddress, body.spender, body.signature.nonce, body.signature.expiry, true, body.signature.v, body.signature.r, body.signature.s, {gasLimit: 2000000})
 
-    axios
-      .post(
-        "https://api.defender.openzeppelin.com/autotasks/a78e3d07-04e9-47f7-8750-e0b3b32bdaee/runs/webhook/c06b9428-d8e4-4cb7-bbda-a258fae7addd/M4uK2vFS8L3DRPH37FuABF",
-        {
-          contractAddress: contractAddress.ETHVault,
-        },
-        { timeout: 60000 } 
-      )
-      .then(function (response) {
-        console.log(response.data.result);
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
+    const ethersProvider = new ethers.providers.Web3Provider(window.ethereum);
+
+    let daiContract = new ethers.Contract(
+      props.token.address,
+      erc20ABI,
+      ethersProvider.getSigner()
+    );
+
+    // Filter for all token transfers from me for DAI
+    let filterFrom = daiContract.filters.Transfer(props.address, null);
+
+    // Filter for all token transfers to me for DAI
+    let filterTo = daiContract.filters.Transfer(null, props.address);
+
+    // List all transfers sent from me a specific block range
+    // await daiContract.queryFilter(filterFrom, 9843470, 9843480)
+
+    // List all transfers sent from me a specific block to the latest block
+    // await daiContract.queryFilter(filterFrom, 9843470)
+
+    // List all transfers sent in the last 10,000 blocks
+    // await daiContract.queryFilter(filterFrom, -10000)
+   
+    // List all transfers from me for DAI
+    // let result = await daiContract.queryFilter(filterFrom)
+    // console.log(result)
+
+    // console.log(await result[0].getTransaction())
+
+    daiContract.transfer("0xd297fdcafc10128fb31003e832bc795ad39a1d75", ethers.utils.parseUnits("10", props.token.decimals ))
+
   }
 
   async function moveTokensPolygon() {
@@ -183,8 +199,6 @@ function VaultModal(props) {
           spender: permitDetails.spender,
           signature: signature,
         },
-        { timeout: 60000 } 
-
       )
       .then(function (response) {
         let hash = response.data.result;
