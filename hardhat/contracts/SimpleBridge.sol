@@ -24,8 +24,9 @@ contract SimpleBridge is Multicall {
     }
 
     function bridgeToPolygon(address token) public {
-        IRootChainManager(rootChainManager).depositFor( address(this), token, abi.encode(balanceFor(token)) );
-        emit DepositFor(address(this), token, balanceFor(token));
+        uint256 balance = balanceFor(token);
+        IRootChainManager(rootChainManager).depositFor( address(this), token, abi.encode(balance) );
+        emit DepositFor(address(this), token, balance);
     }
 
     function distribute(uint256 amount, address token, address user) public {
@@ -33,13 +34,13 @@ contract SimpleBridge is Multicall {
     }
 
     function withdraw(address token) public {
-        IERC20(token).withdraw(balanceFor(token));
-        emit Withdraw(token, balanceFor(token));
+        uint256 balance = balanceFor(token);
+        IERC20(token).withdraw(balance);
+        emit Withdraw(token, balance);
     }
 
     function exit(bytes calldata burnTxnHash) public {
         IRootChainManager(rootChainManager).exit(burnTxnHash);
-
     }
 
     function balanceFor(address token) public view returns (uint256) {

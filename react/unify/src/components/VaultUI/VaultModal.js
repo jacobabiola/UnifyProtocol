@@ -122,7 +122,7 @@ function VaultModal(props) {
     //   ethersProvider.getSigner()
     // );
 
-    // let balance1 = await simpleBridge.balanceFor(props.token.address);
+    // let balance1 = await simpleBridge.balanceFor(props.token.polygonAddress);
     // console.log("You have ", ethers.utils.formatEther(balance1), " amount of tokens");
 
     // let balance2 = await simpleBridge.balanceFor("0xb5B640E6414b6DeF4FC9B3C1EeF373925effeCcF");
@@ -175,17 +175,17 @@ function VaultModal(props) {
 
 
 
-    // let daiContract = new ethers.Contract(
-    //   props.token.address,
-    //   erc20ABI,
-    //   ethersProvider.getSigner()
-    // );
+    let simpleBridge = new ethers.Contract(
+      contractAddress.SimpleBridge,
+      SimpleBridgeArtifact.abi,
+      ethersProvider.getSigner()
+    );
 
     // Filter for all token transfers from me for DAI
     // let filterFrom = daiContract.filters.Transfer(props.address, null);
 
     // Filter for all token transfers to me for DAI
-    // let filterTo = daiContract.filters.Transfer(null, props.address);
+    let filterTo = simpleBridge.filters.DepositFor(null, null);
 
     // List all transfers sent from me a specific block range
     // await daiContract.queryFilter(filterFrom, 9843470, 9843480)
@@ -196,9 +196,71 @@ function VaultModal(props) {
     // List all transfers sent in the last 10,000 blocks
     // await daiContract.queryFilter(filterFrom, -10000)
    
-    // List all transfers from me for DAI
-    // let result = await daiContract.queryFilter(filterFrom)
-    // console.log(result)
+    // // Get all DepositFor events
+    // let filterTo = simpleBridge.filters.DepositFor(null, null);
+
+    // // Get block from the last week
+    // let currentBlock = await ethersProvider.getBlockNumber()
+    // let block1WeekAgo = currentBlock - 40320
+    // console.log(currentBlock, block1WeekAgo)
+
+    // List all transfers from one week ago
+    let results = await simpleBridge.queryFilter(filterTo, -40320)
+    console.log("Show All DepositForEvents")
+    console.log(results)
+    let blocks = results.slice(-2);
+    let block1 = blocks[0].blockNumber
+    let block2 = blocks[1].blockNumber
+
+    console.log(block1, block2)
+
+    let blockNos = []
+
+    for (const result of results) {
+        blockNos.push(result.blockNumber)
+    }
+
+    console.log(blockNos)
+    console.log([...new Set(blockNos)])
+
+
+
+    // var tokenMapping = {
+    //   "0x27a44456bEDb94DbD59D0f0A14fE977c777fC5C3" : "0x2686eca13186766760a0347ee8eeb5a88710e11b", // DAI
+    //   "0xdA5289fCAAF71d52a80A254da614a192b693e977" : "0xb5B640E6414b6DeF4FC9B3C1EeF373925effeCcF" // USDC
+    // };
+    
+
+    // let simpleBridge = new ethers.Contract(
+    //   contractAddress.SimpleBridge,
+    //   SimpleBridgeArtifact.abi,
+    //   ethersProvider.getSigner()
+    // );
+
+    // let balance1 = await simpleBridge.balanceFor(props.token.polygonAddress);
+    // console.log("You have ", ethers.utils.formatEther(balance1), " amount of tokens");
+
+    // var customHttpProvider = new ethers.providers.JsonRpcProvider(
+    //   "https://polygon-mumbai.infura.io/v3/d293abbebf9e48ca9e3fb7957edd38f4"
+    // );
+    // let daiContract = new ethers.Contract(
+    //   props.token.polygonAddress,
+    //   erc20ABI,
+    //   customHttpProvider
+    // );
+
+    // let filter = daiContract.filters.Transfer()
+    // let results = await daiContract.queryFilter(filter, -90000)
+    // console.log(results)
+
+    // for (const result of results) {
+    //     let from = result.args.from
+    //     let to = result.args.to
+    //     let value = result.args.value
+
+    //     console.log(from, to, ethers.utils.formatEther(value))
+    // }
+
 
     // console.log(await result[0].getTransaction())
 
